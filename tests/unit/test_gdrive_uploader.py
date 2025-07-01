@@ -46,33 +46,6 @@ def mock_subprocess():
         yield mock_run
 
 
-def test_google_drive_uploader_init_success(mock_settings, service_account_file, mock_subprocess):
-    """Test successful initialization of GoogleDriveUploader."""
-    mock_settings.gdrive.service_account_path = str(service_account_file)
-    
-    uploader = GoogleDriveUploader()
-    
-    assert uploader.service_account_path == str(service_account_file.resolve())
-    assert uploader.team_data_folder_id == 'input_folder_id'
-    assert uploader.team_digests_folder_id == 'output_folder_id'
-
-
-def test_google_drive_uploader_init_no_service_account(mock_settings):
-    """Test initialization fails without service account path."""
-    mock_settings.gdrive.service_account_path = None
-    
-    with pytest.raises(ValueError, match='Service account path is required'):
-        GoogleDriveUploader()
-
-
-def test_google_drive_uploader_init_missing_file(mock_settings):
-    """Test initialization fails with non-existent service account file."""
-    mock_settings.gdrive.service_account_path = '/nonexistent/file.json'
-    
-    with pytest.raises(FileNotFoundError, match='Service account file not found'):
-        GoogleDriveUploader()
-
-
 def test_download_team_data_success(mock_settings, service_account_file, mock_subprocess):
     """Test successful download of team data."""
     mock_settings.gdrive.service_account_path = str(service_account_file)

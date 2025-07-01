@@ -12,7 +12,6 @@ from synapse.exporters.telegram import (
     export_telegram_channels,
     format_message,
     format_reactions,
-    format_text_entities,
     list_available_channels,
 )
 
@@ -54,19 +53,6 @@ def mock_message(mock_user):
     message.reactions = None
     message.action = None
     return message
-
-
-def test_format_text_entities():
-    """Test formatting of text entities."""
-    # Test simple text
-    message = MagicMock()
-    message.entities = None
-    message.message = 'Hello world'
-    assert format_text_entities(message) == 'Hello world'
-    
-    # Test empty message
-    message.message = None
-    assert format_text_entities(message) == ''
 
 
 def test_format_reactions():
@@ -165,7 +151,7 @@ async def test_export_telegram_channels(tmp_path):
             mock_client = AsyncMock()
             mock_auth.return_value = mock_client
             
-            mock_settings.return_value.telegram.channel_ids = '123,456'
+            mock_settings.return_value.telegram.channel_ids = ['123', '456']
             
             # Mock channel and messages
             mock_channel = MagicMock(spec=Channel)

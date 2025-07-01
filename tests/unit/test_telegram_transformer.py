@@ -13,7 +13,7 @@ from synapse.transformers.telegram import (
 @pytest.fixture
 def test_data_dir():
     """Get the test data directory."""
-    return Path(__file__).parent / "data"
+    return Path(__file__).parent.parent / "data"
 
 
 @pytest.fixture
