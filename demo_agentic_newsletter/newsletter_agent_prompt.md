@@ -33,4 +33,4 @@ The digest should have these sections:
 
 Keep the digest concise and scannable. Use bullet points liberally. Focus on what matters for team coordination and decision-making.
 
-Output the complete digest in markdown format.
+IMPORTANT: You MUST output the COMPLETE digest content in markdown format directly. Start with "## 📅 Daily Digest" and include ALL sections with actual content from the files. Do NOT output a summary or description of what you did. Output the actual formatted digest.

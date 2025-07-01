@@ -109,14 +109,17 @@ jobs:
           cp -r ./gdrive_data/* digest_workspace/ 2>/dev/null || true
           cd digest_workspace
           
+          # Debug: Show what files Claude will process
+          echo "Files in digest workspace:"
+          ls -la
+          
           # Generate filename with today's date
           DIGEST_DATE=$(date +%Y-%m-%d)
           DIGEST_FILE="digest_${DIGEST_DATE}.md"
           
           # Run Claude with the agent prompt and redirect output
-          claude -p "Execute the provided instructions" \
-            --allowedTools "LS" "Read" \
-            --verbose < ../demo_agentic_newsletter/newsletter_agent_prompt.md > "$DIGEST_FILE"
+          claude -p "Execute the provided instructions and output the complete digest content" \
+            --allowedTools "LS" "Read" < ../demo_agentic_newsletter/newsletter_agent_prompt.md > "$DIGEST_FILE"
           
           # Verify output was created
           if [ ! -f "$DIGEST_FILE" ] || [ ! -s "$DIGEST_FILE" ]; then
