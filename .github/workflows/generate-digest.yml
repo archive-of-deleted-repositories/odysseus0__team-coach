@@ -74,7 +74,7 @@ jobs:
           SYNAPSE_TELEGRAM__API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           SYNAPSE_TELEGRAM__SESSION_STRING: ${{ secrets.TELEGRAM_SESSION_STRING }}
         run: |
-          START_DATE=$(date -d "${{ github.event.inputs.start_days_ago || '7' }} days ago" +%Y-%m-%d)
+          START_DATE=$(date -d "${{ github.event.inputs.start_days_ago || '1' }} days ago" +%Y-%m-%d)
           uv run synapse-pipeline export-telegram \
             --start "$START_DATE" \
             --end "$(date +%Y-%m-%d)" \
@@ -85,7 +85,7 @@ jobs:
         run: |
           uv run synapse-pipeline download-gdrive \
             ./gdrive_data \
-            --since-days ${{ github.event.inputs.start_days_ago || '7' }}
+            --since-days ${{ github.event.inputs.start_days_ago || '1' }}
       
       # Transform Telegram data to markdown
       - name: Transform Telegram Data
@@ -179,7 +179,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
           echo "- **Generated at**: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Date range**: Last ${{ github.event.inputs.start_days_ago || '7' }} days" >> $GITHUB_STEP_SUMMARY
+          echo "- **Date range**: Last ${{ github.event.inputs.start_days_ago || '1' }} days" >> $GITHUB_STEP_SUMMARY
           echo "- **Mode**: Full Pipeline (Telegram + Google Drive)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Pipeline Steps Completed" >> $GITHUB_STEP_SUMMARY
