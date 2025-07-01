@@ -7,14 +7,13 @@
 # Channel IDs to export data from
 # Find these using: synapse-pipeline list-channels
 channel_ids = [
-    # "-1001234567890",  # Example: Your channel name
-    # "-1009876543210",  # Example: Another channel
+  "-1002682777986", # Flashbots_X Core supergroup
 ]
 
 # Local directories for data processing
-export_dir = "./data/telegram"                    # Where exported Telegram data is saved
-topic_mapping_file = "./data/telegram_topic_mapping.csv"  # Optional: Map channel IDs to topic names
-output_dir = "./output/telegram"                  # Where transformed markdown files are saved
+export_dir = "./data/telegram"                           # Where exported Telegram data is saved
+topic_mapping_file = "./config/telegram_topic_mapping.csv" # Optional: Map channel IDs to topic names
+output_dir = "./output/telegram"                         # Where transformed markdown files are saved
 
 [telegram_notifier]
 # Telegram Bot configuration for sending notifications
@@ -23,16 +22,16 @@ output_dir = "./output/telegram"                  # Where transformed markdown f
 
 # Notification target configuration
 [telegram_notifier.target]
-# id = "-1001234567890"     # Your group/channel ID (use list-chats command to find)
-# topic_id = 123            # Optional: Thread/topic ID for supergroups with topics enabled
+id = "-1002682777986" # Flashbots_X Core supergroup
+topic_id = 2457       # Update channel topic
 
 [gdrive]
 # Google Drive integration settings
 # Create folders in Drive and share with your service account email
 
-service_account_path = "./service-account.json"   # Path to service account JSON file
-team_data_folder_id = ""                          # Folder ID for input data (meeting notes, etc.)
-team_digests_folder_id = ""                       # Folder ID for output digests
+service_account_path = "./service-account.json"              # Path to service account JSON file
+team_data_folder_id = "11oFJlobneHfKILYpjIB9J_uHtYr-8TZT"    # Context data folder
+team_digests_folder_id = "19v2W2C0DlSgh-9HneDSJTP42fbunqzTQ" # Team digests output folder
 
 # To get folder IDs:
 # 1. Open the folder in Google Drive
