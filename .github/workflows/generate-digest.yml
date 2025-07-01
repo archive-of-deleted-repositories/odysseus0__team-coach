@@ -1,0 +1,249 @@
+name: Generate Team Digest
+
+on:
+  # Weekly schedule - Every Monday at 12:00 UTC
+  schedule:
+    - cron: '0 12 * * 1'
+  
+  # Manual trigger with optional parameters
+  workflow_dispatch:
+    inputs:
+      start_days_ago:
+        description: 'Number of days ago to start (default: 7)'
+        required: false
+        default: '7'
+      skip_upload:
+        description: 'Skip Google Drive upload (for testing)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      skip_notify:
+        description: 'Skip Telegram notification (for testing)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+# Restrict permissions
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  generate-digest:
+    name: Generate Team Digest
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install rclone
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+          rclone version
+      
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install uv
+          uv sync
+      
+      - name: Setup Google Drive Service Account
+        run: |
+          echo '${{ secrets.GDRIVE_SERVICE_ACCOUNT_B64 }}' | base64 -d > service-account.json
+          chmod 600 service-account.json
+      
+      - name: Validate Environment
+        run: |
+          echo "Python version: $(python --version)"
+          echo "Working directory: $(pwd)"
+          echo "Start date: ${{ github.event.inputs.start_days_ago || '7' }} days ago"
+      
+      # Export Telegram data
+      - name: Export Telegram Messages
+        env:
+          SYNAPSE_TELEGRAM__API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          SYNAPSE_TELEGRAM__API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          SYNAPSE_TELEGRAM__SESSION_STRING: ${{ secrets.TELEGRAM_SESSION_STRING }}
+          SYNAPSE_TELEGRAM__CHANNEL_IDS: ${{ secrets.TELEGRAM_CHANNEL_IDS }}
+        run: |
+          # Calculate date range
+          START_DATE=$(date -d "${{ github.event.inputs.start_days_ago || '7' }} days ago" +%Y-%m-%d)
+          END_DATE=$(date +%Y-%m-%d)
+          
+          echo "📥 Exporting Telegram messages from $START_DATE to $END_DATE"
+          
+          uv run synapse-pipeline export-telegram \
+            --start "$START_DATE" \
+            --end "$END_DATE" \
+            --output ./telegram_exports
+      
+      # Download Google Drive data
+      - name: Download Team Data from Google Drive
+        run: |
+          echo "📥 Downloading team data from Google Drive"
+          
+          uv run synapse-pipeline download-gdrive \
+            ./gdrive_data \
+            --since-days ${{ github.event.inputs.start_days_ago || '7' }}
+      
+      # Transform Telegram data to markdown
+      - name: Transform Telegram Data
+        run: |
+          echo "🔄 Transforming Telegram exports to markdown"
+          
+          uv run synapse-pipeline batch-transform \
+            ./telegram_exports \
+            --output ./transformed_data
+      
+      # Generate digest using demo script (until we have generate-digest command)
+      - name: Generate Team Digest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+        run: |
+          # For now, use the demo script with our transformed data
+          echo "📝 Generating team digest with Claude"
+          
+          # Copy transformed data to demo directory
+          cp -r ./transformed_data/* demo_agentic_newsletter/
+          
+          # Run the CI-friendly newsletter generation script
+          python demo_agentic_newsletter/generate_newsletter_ci.py
+          
+          # Verify output was created
+          if [ ! -f demo_agentic_newsletter/newsletter_output.md ]; then
+            echo "::error::Newsletter generation failed - no output file created"
+            exit 1
+          fi
+          
+          echo "::notice::Team digest generated successfully"
+      
+      - name: Create Output Directory
+        run: mkdir -p outputs
+      
+      - name: Prepare Outputs
+        run: |
+          # Copy the generated digest with timestamp
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          cp demo_agentic_newsletter/newsletter_output.md "outputs/team_digest_${TIMESTAMP}.md"
+          
+          # Also keep a latest version
+          cp demo_agentic_newsletter/newsletter_output.md outputs/team_digest_latest.md
+          
+          # Create metadata file
+          cat > outputs/metadata.json <<EOF
+          {
+            "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "date_range": "${{ github.event.inputs.start_days_ago || '7' }} days",
+            "workflow_run_id": "${{ github.run_id }}",
+            "workflow_run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+            "commit_sha": "${{ github.sha }}",
+            "triggered_by": "${{ github.event_name }}",
+            "telegram_channels_exported": "${{ secrets.TELEGRAM_CHANNEL_IDS }}",
+            "gdrive_data_downloaded": true
+          }
+          EOF
+      
+      # Upload artifacts to GitHub
+      - name: Upload Digest Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: team-digest-${{ github.run_id }}
+          path: outputs/
+          retention-days: 30
+      
+      # Upload to Google Drive
+      - name: Upload to Google Drive
+        id: gdrive_upload
+        if: ${{ github.event.inputs.skip_upload != 'true' }}
+        run: |
+          echo "📤 Uploading digest to Google Drive"
+          
+          FILENAME="team-digest-$(date +%Y-%m-%d).md"
+          
+          # Upload and capture the share link
+          SHARE_LINK=$(uv run synapse-pipeline upload-digest \
+            outputs/team_digest_latest.md \
+            --filename "$FILENAME" | grep "Share link:" | cut -d' ' -f3)
+          
+          echo "gdrive_url=$SHARE_LINK" >> $GITHUB_OUTPUT
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+      
+      # Send Telegram notification
+      - name: Send Telegram Notification
+        if: ${{ github.event.inputs.skip_notify != 'true' && github.event.inputs.skip_upload != 'true' }}
+        env:
+          SYNAPSE_TELEGRAM_NOTIFIER__BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          SYNAPSE_TELEGRAM_NOTIFIER__CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SYNAPSE_TELEGRAM_NOTIFIER__THREAD_ID: ${{ secrets.TELEGRAM_THREAD_ID }}
+        run: |
+          echo "📨 Sending Telegram notification"
+          
+          MESSAGE="📊 **Team Digest Ready!**
+          
+📅 Period: Last ${{ github.event.inputs.start_days_ago || '7' }} days
+📄 File: ${{ steps.gdrive_upload.outputs.filename }}
+🔗 [View Digest](${{ steps.gdrive_upload.outputs.gdrive_url }})
+          
+_Generated by Synapse Pipeline_"
+          
+          uv run synapse-pipeline notify "$MESSAGE"
+      
+      - name: Workflow Summary
+        run: |
+          echo "## Team Digest Generation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "- **Generated at**: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Date range**: Last ${{ github.event.inputs.start_days_ago || '7' }} days" >> $GITHUB_STEP_SUMMARY
+          echo "- **Mode**: Full Pipeline (Telegram + Google Drive)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Pipeline Steps Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Telegram data exported" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Google Drive data downloaded" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Data transformed to markdown" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Digest generated with Claude" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ github.event.inputs.skip_upload }}" != "true" ]]; then
+            echo "- ✅ Uploaded to Google Drive: ${{ steps.gdrive_upload.outputs.gdrive_url }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [[ "${{ github.event.inputs.skip_notify }}" != "true" ]] && [[ "${{ github.event.inputs.skip_upload }}" != "true" ]]; then
+            echo "- ✅ Telegram notification sent" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "The generated digest is available as an artifact in this workflow run." >> $GITHUB_STEP_SUMMARY
+
+  # Error handling job
+  error-handler:
+    name: Handle Workflow Errors
+    runs-on: ubuntu-latest
+    needs: generate-digest
+    if: failure()
+    steps:
+      - name: Report Failure
+        run: |
+          echo "::error::Team digest generation failed. Check the logs for details."
+          echo "## ❌ Team Digest Generation Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The workflow encountered an error. Please check the logs for details." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Common issues:" >> $GITHUB_STEP_SUMMARY
+          echo "- Missing secrets (API keys, tokens)" >> $GITHUB_STEP_SUMMARY
+          echo "- Telegram authentication issues" >> $GITHUB_STEP_SUMMARY
+          echo "- Google Drive permissions" >> $GITHUB_STEP_SUMMARY
+          echo "- Python environment setup issues" >> $GITHUB_STEP_SUMMARY
+          echo "- rclone installation issues" >> $GITHUB_STEP_SUMMARY

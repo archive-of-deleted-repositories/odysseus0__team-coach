@@ -1,0 +1,173 @@
+LSDan  01:13
+note taker. You gotta say hi to the note taker too. Yeah, I I hate taxes
+
+Andrew Miller  01:30
+still taking a while, isn't
+
+LSDan  01:32
+it? It's just, it's just due tomorrow, and then just bleeding into all of the things. Yep, I always forget how many pieces of paper it is.
+
+Andrew Miller  01:47
+Yeah, I'm putting off a whole bunch of stuff that I have to attend to along those lines, but I can wait a little bit.
+
+LSDan  01:58
+Yeah, I waited about as long as I possibly could. It's due, due May 1 on a hurricane exemption from Florida in 2023 so there's really no more delaying it. Hello. Our next stunt is going to be finding an IRS approved sender that's open on a national holiday here in Estonia.
+
+Andrew Miller  02:34
+No, you really need to file it, though
+
+LSDan  02:37
+it has to be postmarked tomorrow. Yeah, and they don't. They don't take E file on anything a year past. It's pretty, pretty wild to be thinking about mailing pieces of paper halfway around the world in this day and age.
+
+George Zhang  03:02
+Hey, George, Hey, Dan.
+
+LSDan  03:11
+Should we just dive in and hope chi Xiao joins us soon?
+
+Andrew Miller  03:16
+Yeah, let's do that.
+
+LSDan  03:18
+Sounds good, George, you want to kick us off.
+
+George Zhang  03:25
+You mean the stuff I'm working on? Yeah,
+
+LSDan  03:27
+we normally make you wait till the end, after we talk about teleport shit for like, a long time, so I figured I'd see how coordination is going first, switch it up a little bit.
+
+George Zhang  03:38
+Sure. Yeah. On. So it's basically the stuff I went over in the, like, the weekly meetings. So essentially, right now we have, like, essentially working for one type of data as kind of people related data and so kind of, so there is for that. Like, they're essentially two problem that I'm working on. One is not all the people are recognized in the transcripts. There are still a lot of unrecognized people, I think, especially for the recordings, essentially from hacker houses, where you just kind of like, left the stuff recording in real life, live. You know, audios there feel like it's a lot of unrecognized names, just like Speaker 123, stuff like that. So I'm trying to see, like, if what to what's the best do about it? Like, right now, the hope is that essentially, just prompt an Oscar to recognize what are the speakers, and then for the unrecognized one, just drop them. Yeah. So that's the thing, and the the other is just kind of like merging the things, or merging all the, like, extracted people information out of their transcripts, because, like, something, some information. Might not, might not like to be immediately useful purely from transcript, simply, simply because, like, transcript is not like a complete source of truth, right? For example, like there can be parsing the transcripts that says it kind of attracted Okay, some actions that needs to be performed right then, like, it says, Okay, it's still pending, but like, it might have been, already be happening elsewhere, right? Because it's just not talked about in meetings. That's turning to transcripts. So I might just leave them on for now, and that we can, like, think about like, what to do with them later. Another part I need to check with Dan is, right now I know that there is some kind of cron job that's kind of running maybe, you know, maybe it's like actual artists with manual work that's kind of like convert, converting, exporting transcripts from other to Google Drive, because I see that, like the new transcripts appear there pretty on time. So, but I'm not sure if that part is recorded right now, because that's also an integral part of the system. So I say, OK, it will be helpful to have precise documentation of what that part of the system looks like at this moment
+
+LSDan  06:26
+that that part of the system is a mechanical turk called LSDan in between Dropbox and Google Drive. Oh, shit. Okay. What I'm currently doing is every time there's a transcript, I go and I click Save to Dropbox, and then that downloads it to a folder on my computer. I give it the time stamp, and then I put it into Google Drive.
+
+George Zhang  06:50
+I see automation. It
+
+LSDan  06:51
+hasn't been a big enough task like bother automating it yet, but yeah, we should probably automate that? Yeah,
+
+George Zhang  07:01
+of course, sounds good. So yeah, I'll just record that as like, you know, mechanic took, I mean,
+
+Andrew Miller  07:07
+it sounds like you're good enough at it that you get commendations for being prompt about it. So you're exhibiting all the best qualities of the agents they should be able to watch. It
+
+LSDan  07:16
+is unfortunately or fortunately. Not the first time I've been mistaken for a robot or automated process.
+
+George Zhang  07:25
+Yeah, yeah. So I think, like, for this part of work, then like, this week, this week, I'm also going to adding the telegram chat, right? The process shouldn't be that different, like, except that telegram is not naturally chunked, right? So just do some chunking and do the same MapReduce Cynthia. It should work pretty well, yeah. And then, like, this whole setup should be, like, good enough for a lot of things, until, like, you know, Google might, might set us up for the Google agent space, and then we can test it out and see what are some of the missing stuff there. Yeah,
+
+Andrew Miller  08:11
+I had a suggestion back for the, I mean, missing, like, data, like, I wonder if it's useful to have like, or, you know, a missing, um, let me say speaker name annotations. Like it would seem like there's a difference in context between, like, background noise when it's not hearing anyone and so it's like a lot of misidentified speakers, versus where, like there's otherwise high quality context except for the speaker name, in which case it's like, more worth. I mean, sorting that way would be a good way of saying where it's worth, like, trying to manually relabel them.
+
+George Zhang  08:48
+Oh yeah, I'm definitely not thinking about manually relabel in them at this moment. It's, it's more like, if AI can figure it out just, is kind of like hand waving evil I will say, just try to try a few batches and see if it does a good job. If it can or there isn't enough information to figure out. Say, yeah, just don't worry about Yeah, because we're not supposed to be mechanic Turks annotating data. Do.
+
+LSDan  09:25
+Uh, excellent, um, anything, anything that's blocking you at the moment, or just keep, keep moving on as you're moving on.
+
+George Zhang  09:33
+Oh, it's all good. It's all good. Yeah. Just need to, yeah, do things step by step. And I think I should be, I should be clear mid next week from this whole thing.
+
+LSDan  09:46
+Awesome. Albion, any updates? I've seen you going through other Tiktok libraries and things like that. Yeah,
+
+Albiona Hoti  09:53
+actually, Andrew has been like looking around, because it's too bad that to Chow is not part of the call. I just DM her as well. But yeah, whatever. Yeah. My current progress is in different threads of work, but today I'm focusing on two of them, which is getting ready that one pager product line to share it with you, with everyone in the team, which I'll talk about that. I will go through that with Andrew Soho that I met him in person today. We are co working together, and D Mars will be part of the call as well, part of the meeting. So I'm hoping to get the first feedback line on the product page, vehicle that we will then tomorrow, let's say, review all of us here together, and just knock it down in in the context of for the next week that's going to be developed, or, like, next week and a half, like two weeks spent, and then we Go for the next version of like features and whatnot. And also the other thread of work is, like a specific, like a like a post for the forum on related to hacker houses, what happened and whatnot, from my perspective, that's going to also give some data input to Andrew when he prepares, like, a slide for that on, kind of some numbers on, like, workshops and whatnot that happened during the houses. I still don't have the draft in place, but yes, I'm seeing it happening. It's like, I'm focusing on that product page to share it with you, and then focusing on the blog as well, for today, tomorrow and Friday, I think, but for I'm aiming for tomorrow to share the one pager thing and then go from there on the development perspective, yeah, I'm not sure if I should dive more deeper into one of these. But yeah,
+
+LSDan  12:10
+what are what are you? What do you need in order to be more sure?
+
+Albiona Hoti  12:17
+Nothing, really. I talked to Andrew today. We had a call. Walked him through the things, just like sharing the link, actually when I feel certain, and today is the day that I just will cut the timing and share it with everyone, and then go from there. My aim is to do the dog perspective, to have them ready as Shin has those ready whenever I get Yeah, George knows whenever he would. We get requests from Shin, the the for the format of the dog, how he would share it. I guess that's That's my aim. To do it for my apps. So, okay, great, yeah,
+
+LSDan  13:03
+excellent. Andrew, how about you? How's the research into scraping and using browser tooling going?
+
+Andrew Miller  13:17
+Yeah, the only one that I tried that seems super promising is this David tether, unofficial Tiktok API, which looks really excellent from what I've understood. Of it, it uses a playwright browser. It mainly uses that browser to handle making requests, so it doesn't do a ton of like mouse based stuff. It is like sending API requests, but it's sending them through JavaScript running in a browser session, which is how Tiktok expects to receive it. So that kind of makes sense. It's like, it basically means that the playwright browser isn't the only way that this could be done, but it makes sense that, like, why that's a good choice. It's like, fairly maintainable as a way of doing it. What else to say about that? I tried that out with like copying my logged in cookie from my logged in tiktok.com user, and that worked. So this seems like a really promising so this is specifically initially useful for this is useful for several things. So the first thing this is useful for is, this is a good way of handling the automated account posting where, like, having a user login with low friction isn't a big deal. We can just copy, paste the cookie from the browser for its, you know, our own accounts that we're running. So that's already useful for that. That's the thing that actually, I think Albion needs the most for comment creator funds. So this is, I think, actually, like a great way of doing that. The second thing is useful for is just looking at how they set up their playwright browser from my last week thing, I wasn't able to make the headless browser with LLM driven browser, whatever log in correctly due to the anti detect, but I should just be able to copy things from theirs, and it's like a successful recipe for handling a login without getting caught by the anti detect. And then the last thing is this would probably be useful for handling user logged in for like as an alternative to tic API for getting liked videos from users who log in. It doesn't exalt itself. Seem to handle the login process like with a web QR code. But it seems like that would be a pretty good starting point. It doesn't like I don't think that would be hard to add to this. I mean, I mean, I guess that's the same kind of answer, saying the one way of doing it is by using the browser use so it's the same as my second point. But anyway, um, yeah, that seems promising for both a middle term and, like an immediate term.
+
+LSDan  15:59
+Awesome. Um, well, from my update, we've had a couple of conversations with Shu chan ao about designing the API and data store. She was going to be putting together a kind of spec that we could review and iterate on tonight, so hopefully we'll hear from her in a little bit. But failing that, tomorrow, I'll kind of take a crack. Once I'm done with these taxes, take a crack at the the spec and, you know, maybe building an MVP if I need to. So that's kind of where I'm at right now. I'm planning on doing a lot of architectural work with her on that towards the end of the week, and looking at ways that we can cross reference, or other ways that we can implement, start to build a roadmap. I think we're getting pretty close where we could actually start to see some user stories around what we want to what we want to produce, and things like that. So Albion, you and I are talking tomorrow, and we're going to get the kind of narrowing the scope and focus there a little bit as well. Hopefully combine the kind of core goals that Shin has with the core goals that you have and the things that are available to us right at the moment. Yeah, go ahead.
+
+Albiona Hoti  17:21
+Yeah, what I would appreciate is that, um, our one on ones are very valuable. Like when I say our own ones, it's like Andrews with you, and then I talked yesterday with George. For some reason, I do want to have those one on those calls every other day, all of us in one so that we can all be on the same page, so that I don't have I am finding it valuable to repeat things in different people and like then get things that I need from different sources, but at the same time, maybe, for example, two towels line and work on the Tiktok use cases, or like the data flows that we need and stuff and Andrew's input that he just shared a lot of resources and stuff, I feel like those could be combined In one source of truth with human input. So maybe we want to have every other day stand up type of calls. I would really like it all of us together, and I'd like this big call once a week.
+
+LSDan  18:37
+I've been kind of waiting until we hit the next logical phase of forward development before i i suggest some some changes to our call format, but generally speaking, I agree with you. I do think there's value in one on ones, particularly as we narrow in specific constraints. What I've noticed in this group is that when we have larger conversations, we tend to kind of rabbit hole into something specific or something that matters more to one person than to another person. And so, for instance, like you were being kind of drowned out in the last several weeks in terms of what you were working on and what was most important to you. That's kind of why I wanted to have those that's why the format sort of emerged the way it did. When Tina suggested that the three of us, or that the two of us talk more frequently, I think that three calls a week is probably enough, and with a text, stand up. But I don't want to enforce that yet, until we kind of know what we're doing in a more mechanical sort of way. Right now, we're doing a lot of exploration and research. Still, it's sort of hard to quantify that into a single line of, hey, I looked into this package. Or, you know, that talk to this person or that person, right? So I'd love to, I'd love to see us moving, as we get into next week, into a more structured format as a group, and we can sort of see what level of structure works and what level of structures is too much. Yeah, go ahead, Andrew. I mean,
+
+Andrew Miller  20:25
+I had a suggestion, but I'm also happy just to wait till next week to talk about it, probably like you're suggesting. But my suggestion is, it seems like we're close to that if we consider that this engineering scoped meeting, also we get to do it in a stand up style. I guess the Monday meetings that we've been having, I guess they've alternated for being of a standout format to just soaking in one topic, if it's available or Tina has a long, detailed thing to go into, but otherwise, could be used for that. No, we started the tool meeting on Friday. Maybe just the time zone of that has changed, but that seems also kind of useful for that. So basically, the suggestion was just to mark at least this meeting and Friday as at least partially an output for that.
+
+LSDan  21:18
+Yeah, I think we can do that and
+
+Albiona Hoti  21:22
+for the Friday meeting. Yeah, my goal, my initial goal, was to have like a demo slash tools. So I think I'll just keep that in place for it and slowly build up the muscle to demo things on a weekly basis. By the end of the week, I
+
+LSDan  21:43
+Yeah, sounds good. Let's, let's see. I mean, I don't want to force that meeting occurring if it's not providing value, but I do think that maybe we should try to have it at least once, because I don't think we've had it as a whole team once since you scheduled it. So, yeah, let's, let's see how it emerges. I mean, meetings for meetings sake is, is unfortunate for everybody, I think, and generally, and but, but we definitely want to make sure we're talking enough to cross pollinate. Well, cool. In the absence of anyone else here, I think that's pretty good, unless anyone has anything they want to bring
+
+George Zhang  22:28
+up regarding meeting. I also feel that like you should only essentially be necessary, only be like, you know, focused and tailored for the things that's hard to do with async written communication, like you shouldn't, like, replace proper written async communication, especially, you know, with AI because, and that's actually what's gonna, you know, get the AI teammates on speed as well. So, so I think, like, we were doing a good, decent job. I think, like, you know, even for like individuals, you know, written communication return updates should be first and then, like, use meeting time very specifically to resolve issues that's hard to communicate or communicate it, but not properly when you know, once you're in written, yeah, yeah,
+
+Andrew Miller  23:23
+is there a way of doing a little bit for both? I feel like I sometimes alternate whether I prefer doing for myself an async update versus, you know, enjoying the rhythm of participating in stand ups, but it's not as fun. I mean, is there a way to either file your async one or do a live one, and then that we, each of us, gets the benefit of that.
+
+Albiona Hoti  23:49
+In my perspective, I feel like the async communication is getting lost in all of the sources that is that are happening on the huge group, and usually, at least in my perspective, most things get solved extremely fast if you just talk and not write. Yes, documentation is great to put things in place so that the nor not the same work happens from two different or three different people, but to align on the priorities on the tasks or feedback, fast, feedback duration, on a direction to go, especially on like, those many things that you're building, is just, I think, necessary. That's why it's like, if we didn't connect for, like, let's say, two weeks on a call and we just shared docs, it's all it's or maybe I just, for me, it flows better when I talk to people, personal instinct, I guess. But yeah,
+
+LSDan  24:51
+yeah, the sweet spot here is finding the balance that works for everybody on the team, and, and, and I think we'll, we'll get there as soon as we have a little bit more cohesive focus, and, you know, that's something I've been saying to Andrew each time we talk, I feel like that's really coming into coming to fruition. Now we have a goal, like the scope is narrowing, not expanding. You know, we know what tech we're working with. We've, we've got a sustainable number of development tracks underway. All of these things are really good. So if that holds, we can start to formalize the process around productionizing those things. And that process, I think, is, is, you know, very close to ready in terms of our willingness to to use it. Now, we have to figure out exactly what pieces we want to use and what's effective for us so, so, like I said, that that is definitely I'm looking to get through one more Monday call without the world changing, and then I will feel comfortable that we're ready to start putting in specifics.
+
+Albiona Hoti  26:15
+Awesome, oh, hey, join
+
+Chuqiao Ren  26:20
+Hey, sorry about I forget about time.
+
+LSDan  26:23
+No worries. We've all kind of gone through it. So we can kind of dive in on your plan if you want to. And George or Albion if you want to stay around, feel free. If you don't, feel free to drop
+
+Chuqiao Ren  26:40
+Cool. Sure give me one sec. I Oh, I kind of remember, I only have the authentication part done. It's okay if we review it sometime later today. More important to want to review it now.
+
+LSDan  27:32
+We could, we could review tomorrow. My day is getting a little bit late, and then I gotta finish up some tax stuff tonight. But you were, you had talked at the end of our call yesterday about developing, like kind of a little bit of a write up plan of what you wanted to build. Yeah,
+
+Chuqiao Ren  27:47
+so I only draw the authenticated like the QR code and how we authenticate people, how we define API. But there are some like other how we collect data, how we streaming data, that part. I think I still need to work on it.
+
+LSDan  28:05
+Okay? Um, it might feel like I'd be happy to look at it now, whatever you got so far. Uh, Andrew, sorry, what was that?
+
+Andrew Miller  28:15
+I'm just indicating that tomorrow at a similar time is fine for me.
+
+LSDan  28:20
+Oh, yeah, let's, let's do tomorrow at that point, then otherwise, I
+
+Chuqiao Ren  28:24
+can send you the link first tonight, because it's zero night time right then. And Andrew,
+
+LSDan  28:33
+yeah, right now, it's 10 o'clock at night for me. Oh, so I'm 10 hours off of the West Coast, so I could do late, your time would be early, my time like midnight for you or or we could do tomorrow.
+
+Chuqiao Ren  28:49
+Yeah, we can do tomorrow if it does not too late for you.
+
+LSDan  28:53
+Yeah, sounds good. Go ahead and send an invite for for whatever works for you, in the the morning, around the same time would be good.
+
+Chuqiao Ren  28:59
+Yeah, sounds great. And I got posted in the group chat, first, and then we can talk about it well.
+
+LSDan  29:07
+Excellent. All right, thanks everybody. Awesome.
+
+
+Transcribed by https://otter.ai

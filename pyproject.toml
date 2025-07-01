@@ -1,0 +1,68 @@
+[project]
+name = "synapse-pipeline"
+version = "0.1.0"
+description = "Data pipeline for exporting and transforming Telegram data"
+readme = "README.md"
+authors = [{ name = "George Zhang", email = "georgezhangtj97@gmail.com" }]
+requires-python = ">=3.12"
+dependencies = [
+  "typer>=0.15.4",
+  "pydantic>=2.0.0",
+  "pydantic-settings[toml]>=2.0.0",
+  "python-dateutil>=2.8.0",
+  "telethon>=1.35.0",
+  "httpx>=0.25.0",
+]
+
+[dependency-groups]
+dev = [
+  "ruff>=0.3.4",
+  "pyright>=1.1.349",
+  "pytest>=8.0.0",
+  "pytest-mock>=3.12.0",
+  "pytest-trio>=0.8.0",
+  "pytest-asyncio>=0.21.0",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+include = ["src/synapse/**/*.py"]
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.pyright]
+pythonVersion = "3.13"
+typeCheckingMode = "strict"
+reportUnnecessaryTypeIgnoreComment = true
+include = ["src/synapse/**/*.py"]
+venvPath = ".venv"
+# Exclude telegram exporter from strict checking due to untyped telethon library
+exclude = ["src/synapse/exporters/telegram.py"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint]
+extend-select = ["Q", "RUF100", "C90", "UP", "I"]
+flake8-quotes = { inline-quotes = "single", multiline-quotes = "double" }
+isort = { combine-as-imports = true }
+mccabe = { max-complexity = 15 }
+
+[project.scripts]
+synapse-pipeline = "synapse.cli:app"
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
+]
+addopts = "-m 'not integration'"  # Skip integration tests by default
+testpaths = ["tests"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/synapse"]

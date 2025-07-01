@@ -1,0 +1,40 @@
+# Synapse Pipeline Configuration
+# This file contains non-sensitive default configuration for the pipeline
+# Sensitive values (API keys, tokens) should be set via environment variables
+# Environment variables will override these values using pattern: SYNAPSE_<SECTION>__<KEY>
+
+[telegram]
+# Channel IDs to export data from
+# Find these using: synapse-pipeline list-channels
+channel_ids = [
+    # "-1001234567890",  # Example: Your channel name
+    # "-1009876543210",  # Example: Another channel
+]
+
+# Local directories for data processing
+export_dir = "./data/telegram"                    # Where exported Telegram data is saved
+topic_mapping_file = "./data/telegram_topic_mapping.csv"  # Optional: Map channel IDs to topic names
+output_dir = "./output/telegram"                  # Where transformed markdown files are saved
+
+[telegram_notifier]
+# Telegram Bot configuration for sending notifications
+# Bot token must be set via environment variable: SYNAPSE_TELEGRAM_NOTIFIER__BOT_TOKEN
+# Create a bot using @BotFather on Telegram
+
+# Notification target configuration
+[telegram_notifier.target]
+# id = "-1001234567890"     # Your group/channel ID (use list-chats command to find)
+# topic_id = 123            # Optional: Thread/topic ID for supergroups with topics enabled
+
+[gdrive]
+# Google Drive integration settings
+# Create folders in Drive and share with your service account email
+
+service_account_path = "./service-account.json"   # Path to service account JSON file
+team_data_folder_id = ""                          # Folder ID for input data (meeting notes, etc.)
+team_digests_folder_id = ""                       # Folder ID for output digests
+
+# To get folder IDs:
+# 1. Open the folder in Google Drive
+# 2. Copy ID from URL: https://drive.google.com/drive/folders/[FOLDER_ID]
+# 3. Share folder with service account email (found in service-account.json)

@@ -1,0 +1,449 @@
+LSDan 0:00
+Yeah, you know, whatever you guys want to paper, I'm happy to paper. I don't need to pay for anything else.
+
+Ahmed Ghappour 0:07
+I think the only thing that I just need to sync with Tina to get her to, like, say yes to the person on Slack. Basically, that's really
+
+LSDan 0:20
+it. No worries. Yeah, hey, everybody, do we know if Tina is going to be joining us on this call?
+
+George Zhang 0:34
+Um, he's back. She's backing China. So this is 1:30am on am morning, right? So,
+
+Ahmed Ghappour 0:44
+but 1:30am is pretty prime for Tina, right? So that's also a good point. Yeah,
+
+LSDan 0:53
+I've had with her 130 in the morning. So
+
+Ahmed Ghappour 0:59
+cool as of like, 30 minutes ago, just FYI,
+
+LSDan 1:04
+yeah, let's, let's dive as if she's not going to be here, and then if she joins, that'd be great. Um, I think the obviously, I was out last week, so for for most of the week, but Andrew, maybe you want to lead with, with updates that are required. I saw you guys changed a whole bunch of stuff in terms of, like, like, our thinking process, but I generally agree with everything I read.
+
+Andrew Miller 1:35
+Yeah, I'm not sure where to dive in and go. I mean, most of all of these are related to just focusing specifically upon Tiktok, and everything switches out from there. Mostly, I've been preoccupied with exploring the Tech Talk APIs, and talked about that a bunch with chicha and xYn and Albion as well. And that, I think you've been looking on that as well. Oh, yeah, I'm interested to hear, okay, yeah, this is my thing. I'm interested to hear all these updates, especially with common creator fund and fund and other product planning. And I guess actually, I've been thinking about how to reconcile both Albion's ideas and then what I tried to distill from shins, and I'm happy to, like, talk about those actually now, I mean, at this point, I've shown on several people this little slide deck that I think is my attempt at distilling from Shin is explanations, since you're on this caution, and maybe the most thing I should do is try to hear from you on Your idea of app, product focus and what we should do, and maybe get input on that. I've kind of talked about this with LSD Stan, talked about it with Albion, with dmars for feedback, but I don't know that any of that combination has heard it from you. Yeah, the updates that I must learn from Ellie and from xYn.
+
+LSDan 3:05
+Cool, real quick. Andrew, could you expand on access to that Docu? Drop in coordination. It looks like a couple of us are, oh, really, yeah, I
+
+Andrew Miller 3:15
+see, yeah, hold on, alright. It's Mark. Anyone can add and I'll submit it. To document where anyone can add to it. It's just screenshots that I took while I'm trying to explore tick API, Yep, I've got it now.
+
+Andrew Miller 3:41
+I mean, let's go in this order. Albion, do you want to talk about your updated plan for common creator fund? Yeah,
+
+Albiona Hoti 3:50
+I do not have a doc to share with you guys, but I'll be working on this this week. But I can walk I can just talk through the things that I did last week and how I will continue as the next steps i i did let like wrote on the on the chat that I'm doing this mini automation flow of like generating a specific type of videos based on comments that I can scrape, which is through COVID, slash, mid journey. Slash, another AI tool that can generate a video based on an image. But I've not connected all of these together. I've just done them manually, and I think I've come to the to the concrete steps of what I need to do to start generating those reaction videos. They might not look the greatest or anything, but I think it's good to go as the first mini proof of concept app based on comments. And then I also gave a sheet of ideas that I want to build based on the comments. Because, yes, comment creator fund is actually a specific idea, which includes, like, a dashboard that wants to create this fund based on people who commented and had great comments, and generate revenue based on, sorry, I'm on the coffee shop, but I'm outside of it because it's too noisy. Yeah, my current struggle point is this, should I only aim for the workflow that would be scraping the comments, texts on comments, creating the video reactions, and that's it. And then iterate on that and see that. Oh, the videos on Tiktok are, are having, are reaching a specific number of views actually aim for this, plus the mini app idea. The mini app ideas that I have are on this sheet. I'll share on the group, because I shared on telegram. But I feel like, yeah, so all of these many ideas that I have are based on common, common creator flow, in a way, because
+
+Xyn Sun 6:37
+you share, I don't see people's reactions. Yeah. You.
+
+Albiona Hoti 6:44
+So those, those are like five of them, which kind of are on the same bubble of ideas, right? So each of those is dependent on interactions of users through commenting or something doing something other than the like and or maybe posting, but by using the video, the sound of that video of the AI agent or something, for example, the commentator fund would be okay. There is an AI agent account that generates all of these videos and creates this five wheel between the user interactions and the app interaction. And then whatever the user does on the app gets repurposed on the AI agents account, which triggers the user's reaction as well that they interacted on the app. This whole flow is a little big. That's why I'm saying. Should I just aim for the current, very automated based reaction AI videos and connect the context of these comments as a loop and see from there? So yeah, sorry to give all of these, like data, but yeah, it's it will be better for for me to put this in a doc and come to the presentation that was my goal for this week, and then get input and just decide on a specific line of work and come then by the end of the Week with a specific, like, demo day or something, because I already like, have, I already have a very good idea on these reaction videos that I really like, and the two links, so the tools that I'm like, using and stuff are on the second sheet. And the current flow is like, Okay, I scrape comments, I get the context through a GPT layer by kind of asking GPT to extract what would be the vibe of the comments on a specific overview, and then get that context to generate quotes based on that context. When I say generating quotes or something is for the AI reaction videos, and then video background production is like search through pixels.com website for a video or get a an interesting image on mid journey to convert it into video via clink AI tool and then generate the X amount of videos by combining all of these in kind of automation tool that they have, a very good one. But, yeah, sorry. I feel, I feel bad that I didn't put all of this together in the doc. But this, I think it's pretty
+
+Andrew Miller 9:41
+understandable from this spreadsheet, actually. I mean, my inclination was to, actually, I'm curious, as we do this feedback. I mean, it seems like the very first version of this is you've just, like, selected several inputs that putting them together in a sequence amounts to an automated comment driven reaction video workflow, so you respond to trigger events in the form of comments and to KPIs really suitable for that, and then from that, you do some analysis of the video. I guess one thing I don't understand is whether you are waiting like until a comment tags a bot account you're following on a video, and then you initiate some analysis of that video, or whether you are basically just, like, need to scrape top loaded, or, like, most popular, something like that, like a fire hose of currently popular videos, and then you expect to have proactively done some kind of analysis on all of those. But either way, I mean, if it ends in a video production pipeline that posts a video from an automated account, that seems like, but it seems like I would be interested in just seeing, like, the simplest version of that too.
+
+Albiona Hoti 10:53
+Yeah, that's a great question, because the starting point is important. I think because of that starting point that I was, you know, that I was doing the scraping work. All of these mini ideas that I listed on the sheet came from that. Because the starting point is, I think in my, at least in my, in my perspective, is important on the actual niche. So, for example, if I get to decide to do the future solve.fm which is very connected to the daily reset so I did, created a daily reset account on Tiktok, and I started using it. But futures itself daily reset celebration and reset babe is another account. Are all kind of, kind of on the same niche. So how I would approach to figure out, figuring out the scraping is selecting a specific number of hashtags of people doing videos on this niche. Filter out, let's say, if I scrape the feed, I can filter out videos for the niches that I want to generate videos and then do the flywheel I have not tested yet, the endpoint for feed scraping and then based on the feed con video content of a hashtag or background, yeah, I need to test that out. And I think the two endpoints that I shared on telegram will work properly without scraping the user posts. It's just like any post. That's how I would start. Because otherwise, if I just let it be with any kind of niche to just do video reactions, then it's a little it makes sense on the automation side, because then we have the automation we can actually scrape everywhere, right? So based on the context of the video, we can go and like, let's say scrape. I don't know if it's possible, but yeah, scrape mid journey for that context, it extract the picture and then do the video and everything else. But I'm as the first try. I want to maybe control the niche, and then, just for the purpose of the end goal, to be that flash app that actually has people on boards, people to use it based on those videos that will be generated. I
+
+Albiona Hoti 13:25
+i guess that next step is you put this together in place and and, yeah, run that script to to get feed videos and see based on what should I choose, based on what data inputs, like hashtags or what can I scrape the actual niche videos that I want? And then that's it. Then I can move on and integrate the because then if I get the video ID through that, I can just use my current scraping work to get the context and stuff like that. And then the next Tech work that I it's left to do is like, Okay, do another layer of like, extracting context of video, slash content comments, call that into hash like keywords or something like that, so that I can use that to generate quotes on GPT and then scrape videos so that I can combine those two on Canva. I guess that's that would be mine. Is that
+
+Andrew Miller 14:36
+a part of the scraping that's hardest right now? I mean, one of the things that I'm picking out here is like, I mean, there's a combination of these that's like, planning. Like, I think you're trying to think through what will work well, possibly also getting feedback on what will work well. And at some point we'll just have to try it and iterate. But a portion of it also is that, like, it's driven, or you're thinking about it as driven in part by, like, what is the process of scraping? And then I imagine that. I mean, like, you are using kick API for this so far, right? It's a matter of, like, it's at least a little bit a matter of either being able to, like, make it work, or interpret the data that's there, or make it work efficiently enough. Is like, efficiency is something that is, like, holding back, like, each one of the requests, I imagine, like, takes a while and produces a lot more data than is needed.
+
+Albiona Hoti 15:22
+I think what's stopping, like, what's the thing is that once I figured out that, oh, I can actually, I'm getting comments, I'm getting the users of these comments and everything, then I moved on to the next those automation workflows, in a way, because that's what I was missing out. I was missing out on, like, what sort of content, what type of videos should I produce? Now that I'm a little happy on, like, let's say cold generation slash, I might find something else. Now I can actually say, Okay, now I can actually extract context, but it's just like another mini step on scraping, and then do this manually until I figure out, okay, how can all of this be done? Maybe through a script slash plus manual steps so that at least I generate the videos, and then I can move on to the next batch of work, which is the app development. So in this case, yeah, I think the end, like, I would do the manual work for this step to generate those hundreds of videos, because it's not that much work to generate the videos. Now, with this flow, what's, what's more important is, oh, well, I don't want to have the same background, right? I don't want to have the same quote. I want to have some more kind of human level video reactions, right? So I need to figure that out, but I don't care for now. First, I just need to make this flow work. Be happy with it. Test it out, start posting and start using the account as much as I can. And then figure out, with all of you guys, the core features of one of these apps, right? If it's future self or if it's daily reset, figure out once, let's say the people get onboarded. Let's say they get convinced from this AI generated Tiktok account. What would be their user flow? Of them clicking on the app, doing something on the app, reacting something through the app, on their tiktoks, let's say templates of posting or something through the app, and then generate that five wheel, because that's the second most important thing. And I, I was planning to have that over like, have that product, mini app, many, many page to pitch it to you guys, so that we can say, Okay, this makes sense, and start developing it, at least by the end of this week. So those are the two verticals of work for my my, thanks. Yeah,
+
+Andrew Miller 18:12
+okay, it sounds like we can review more of it at the end of the week. Then, yeah, okay. I mean, and I want to draw for that in the following conversation. Also, that's about what this informs about what we can prepare ahead of time for in developing infrastructure and providing like scrape relevant data for this as well. I mean, Shin, I guess I'm most interested in hearing you explain your vision of apps. I've tried to, I mean, I showed you my slide deck of trying to distill it, and talked about that with Dan and others, but none of them have heard from you for a while. Do you want to go over it? And I'm curious your reaction, whether my slide explanations of it are, are, you know, capturing most of it. I mean, to me, the main thing has been trying to come up with, like, easy to build incremental apps that are, like, Lurker friendly. That's the main
+
+Xyn Sun 19:00
+shift for where we chat. For you, talking about specific C
+
+Andrew Miller 19:08
+I guess I've been showing a slide that's a combination of seeding an avatar profile from uploaded history and also feeding it like a virtual pet likes, and then finally, trying to attach the Tick Tock timeline tuner to it,
+
+Xyn Sun 19:25
+all right, yeah, okay, so I think
+
+Andrew Miller 19:27
+and separately as, like a separate one from that, just something that is like automatically applying, like MeV at the meme level, like making a quick filter reaction video maker using some isolated meme concept,
+
+Xyn Sun 19:42
+yeah, I think all of those can be tried quite easily. So the takeaway is always then, like aI produced video accounts earning take out yield is very red ocean, and every average show is doing it. So our edge should be infra. And the really good infra that provides a very different user experience, and all of the apps should indeed use our infra such that we do not get dragged into the red ocean of competition of people just purely iterating based on like on platform names. Okay? So that, I think, as a general guideline, the idea for, for all of it, I yeah, maybe you can see this teleport points. Maybe so good. So this, I think, is actually a very easy one that just basically, it's like a superset version of, you know, yeah, invest and then end of, like, deal with devil, Satan challenger, if it were on Tiktok. So, like, Yeah, I mean, it's pretty it's pretty simple, you know, yeah, maybe let me just talk about, talk about the flow, yeah, so, so, so it's basically like you are scrolling Tiktok, and then you have the dynamic Islander. We can mimic the dynamic Islander by having a PWA that sends User Notifications. In my opinion, it's actually not that important. Like, the like, the point of this app is really to validate the entire loop of like, oh, having this extra how to say type or co pilot app indeed provides a very different experience to viewing Tiktok, you know, it's kind of like a Tiktok learn co pilot. I don't know how to describe it, you know, yeah, I and I think, like, a lot of the core bets that we're doing are huge on, on, on this assumption, right? It's essentially saying, like, all of the content, like aI video contents, are already red ocean. So our edge would be that, oh, we are dedicated accounts. You could do something very different. So like, over here, one thing you could do via dedicated accounts is there, like, Oh, this guy, this, this video creator, you know, you can co author his next video. So what you do is that, like, inside the comment, somebody commented, oh, dunk a cookie in coffee your next video. And then you can just like that video to, kind of, you know, move your point to how to say, pump that pump that comment. And like, you know, creator can get auto payout if the next video satisfy this, right? So this is very similar to like, nerve or happiness, but like the UX is way more integrated as you're like, not really tagging a bot, even though the bot can send updates, it's really like, you can just, you know, pump the comment as you like by liking it right? And then why call it points is that it's basically a generalized version of like a credit system for that, for that creator. But because, because Twitch, I don't know if you guys watch Twitch, but because Twitch has something similar, it's basically, if you have been active in this live streamers, like in this, creators live stream before then you get some from some some points, and you can keep to make the Creator do a challenge, such as, like, hot, sorry, my earphone died, okay. Such as turn off the hot in your in your next boss fight, something like that, right? Okay, yeah, so, so, yeah. Why are we doing this? I yeah, I think roughly, kind of makes sense that like it gives way faster payouts to like annual creators, because my understanding is that like otherwise, you need like 30 days, and then like it adheres with like, oh, the viewer. So it's basically similar to invest, but however, is conditional, and it has a non tagging UX, yeah, and I Yeah. Why I like this is just because it runs through the whole flow of like, the dynamic Islander, immediate feedback, the integrated UX that like, yeah, challenges, I guess, the core thesis that I'm making here, okay, end to end. User flow, pretty straightforward, to be honest. You just, you know, use Tiktok API to fetch the delegated accounts liked comments, which, from my understanding, tik API provides. And then you can, you know, author, many kinds of, like, payouts using USDC or like, we can just use, like, either the petrol or Xyn wallet fund to subsidize some of the points in the beginning. I mean, to be honest, I don't think the points needs to be monetizable immediately. It can just be like, yeah, like, a pure point system for the creator that that that you are right. You're essentially earning, like, I would say, like co author points for the Creator. And yeah. And then the Bootstrap, I think, is pretty straightforward. There are many creators, nano creators, on tick tock, that try to get big by doing, like, challenge videos where, like, oh, the common challenge them to do something. This is essentially, like, just, you know, making the loop better. And then we can just ping them to have them use this system. And then, you know, because it's red ocean for creators. We just have to give, give them Yeah. We just have to either make them think it's cool, which I think is easy, or just Yeah, give them a little bit of like a marketing incentive, which I think should be easily coverable as well. So this is one, and this obviously extensible to the avatar one. So avatar is basically you delegate your So, Avatar, yeah, I think I presented this talk last time. But like the Yeah, but like the avatar one is essentially you delegate your ticket accounts and then it generates, it generates Pokemon based on your, sorry, but based on your timeline, and then your private data. And I kind of want to, yeah, we have several external collaborators hacking our chat GPT history version of this, which I think is pretty cool, because most of the Tick Tock videos are indeed are being chat GPT contents, such as Ansara, or just asking GPT four, oh, to do something, and then posting the video to tick tock. So I think like doing like a cross GPT history one is very interesting. Yeah, and And over there, it's a Yeah, it's another kind of straight forward or just like, make a website there where, if you delegate your tick tock accounts and and, or upload your chat GPT history, you can get a Pokemon that can find other people's Pokemon. And there's a shareable moment about, like, what's your pokemons power? There are numerous open source Pokemon fight engines that you can directly plug and play a card. So, yeah, yeah. I think most of the work will be on front end. So yeah, I guess the context on that app exactly stems from the idea of, like, matching people doing a social app based on matching people, based on their chat, really history, but like, it is kind of like high leave to think of a good matching algorithm. So then a low lift way is actually you generate some traits, such as, if you guys remember the X alignment chart of, like, how chaotic evil are you based on your Twitter history? So, like, January, something like that, create a share room moment, and then use that to bootstrap, yeah, like, like, a social trend, and then you can, like, just, you know, use all of the Pokemon fighting stuff to be post auto posted on like, user's accounts. Yeah, yeah. Because, like, Why? Why to do that is because generative videos are still too expensive, but costume, yeah. But like, if you run a game engine and then just apply a filter or something, it's way cheaper, yeah, and we get free API credits from from those people as well. Okay, I will stop here.
+
+Andrew Miller 29:22
+What do you think is the I have three questions, and I'm sure the best order ones like, what is the like? What do you want help with the most another is like, what things are most clearly like, required that therefore makes sense to do, first, in terms of preparing for this. And then, I guess even just more still, prompting for a reaction. I guess my suggested breakdown of the parts of this, maybe towards something that can be done, like first and fastest, is like just doing like the alignment card generators. I mean my stylizing of this, I think this came from brainstorming with Tina and also Toby, unlike the importance of Live Journal quizzes and character alignment personality quizzes generally, like this is both a good test case for like, easily, rapidly, re skinnable, because there's like, millions of existing, like, character alignment quizzes that I think could be llmified, I mean, And that's just like, you know, filling out your Pokemon character sheet is like, you know, based on an alignment card quiz is like, one of those. So, I mean, that has something that, like, even just that flow is pretty simple, but, like, endlessly reasonable. And that seems notable,
+
+Xyn Sun 30:40
+yeah, I Yeah, but yeah. In general, I think the important part is, like testing, they like delegated account flow, right? Because that's like, kind of the only and most important differentiation. And then for that, I think it has
+
+Andrew Miller 30:55
+to be differentiating, also the
+
+Xyn Sun 30:59
+what could be differentiating
+
+Andrew Miller 31:02
+you said delegated account flow, but I'm not sure what you meant by that. Did you mean delegating, like to automatically do it, or delegating in this? Okay? I think this could mean three things. One is automatically making posts like comments or upvotes or video posts on behalf of a user who's signed up. It could also mean just receiving the liked videos feed? I think that that's the one that you meant. Actually, the liked like, when you like a video, Our system automatically gets that notification, and therefore it can credit you some points or send you some feedback that you liked this video. Here's the result of it. I think that's the one that you mean. The last thing that the delegated stuff could mean it's just having the timeline data available in the first place. To me, that's the like, receiving the upload of the zip file of all your data.
+
+Xyn Sun 31:50
+Yeah, I think all of those interactions count. Yeah. So like, okay, and then we which part I need most help. I think it's, let me see, I was sharing a doc. Let's see.
+
+Xyn Sun 32:21
+All right, here.
+
+Xyn Sun 32:29
+This, right, you guys can see it, yeah? So I think, like, ultimately, the app is actually pretty easy to view. The heavy work is, is actually indeed on infra and operations, yeah, I will say the app work is actually operations work. Okay, so delegated vote, yeah, so I think like it requires a consent. UI, those are all, yeah. I think we can just further type it, and then tkpi Has it already. There's, I think we still don't know how to get the timeline data right. And then we still don't have, like, a replacement for tkpi, which I think is kind of like a long term investment we need to do
+
+LSDan 33:21
+because, yeah, we we have that with tick API, but the or at least some of it, but the problem is that it is currently extremely expensive. You can only pull 3030, responses per list, endpoint per call, and the largest package only allows 10,000 API requests a day. I
+
+Xyn Sun 33:48
+see extremely expensive. You see more expensive than the X API.
+
+LSDan 33:57
+Well, I think we could be in millions of dollars a year if we hit our 10 million mark I
+
+Xyn Sun 34:02
+see, I see, so yes, more expensive than the X API. And also, yeah, yeah, in that case, we will be literally putting an untrusted, close words API inside of the TE and asking users to trust it, which is not great, yeah, right, because, yeah, it's a choke point. Okay,
+
+Andrew Miller 34:28
+sounds like we can affordably get to 10s of 1000s, like we can hit several impressive milestones of success before I think it becomes preventatively expensive, yeah,
+
+Xyn Sun 34:38
+yeah, it's just the cost is actually less worry. I'm just more aware of, yeah, it's just the key and then show coin. I'm
+
+Andrew Miller 34:48
+also so like, to me, it's really useful in going over this to separate which part of the ticket API you're using, because the likes, just, I think they differ. Like, the scraping of public data is one thing. The polling for new videos added to the list of videos the user has liked. That's another. And I just think that these are fairly different.
+
+Xyn Sun 35:16
+Yeah. I mean, those two would definitely be used in the app. Is there
+
+Andrew Miller 35:21
+one that's more important than the other? I mean, I almost view those as things that we need to either, like, split up and tackle different aspects of preparing that pipeline, or otherwise, there's a good chance that by asking around or trying to automate one or the other, like, I do think it matters, like, which of those we start on. Like, we either go spend a bunch of time trying to do a good job of harvesting public videos in order to get a feed of like the top videos and prepare ahead of time like a big cross reference of tags, and, you know, semantic analysis of videos in order to reference it against videos that are like or we spend some time trying to make Like a reliable and scalable like videos list notifier,
+
+Xyn Sun 36:07
+yeah. I mean, if we have to choose fetching like comments, I think is most important,
+
+Andrew Miller 36:16
+like comments or like videos. You mean like comments, specifically
+
+Xyn Sun 36:19
+like comments, yeah, because from others, yeah because, like, videos you can already get via the official API, right? And that part doesn't need engineering from us.
+
+LSDan 36:29
+Yes. I mean, it's going to be very, very difficult to do that in any way that's reasonably, like, a reasonable cost, even a couple 1000 people, right? So like, imagine you take one video and you want to pull the comments on that video. So let's say it's a relatively mediocre number of comments. We've got 300 comments on the video. That's 10 API calls plus one to get the video. That's 11. Now we pull in the user information of each one of those comments. Let's assume some overlap. We're talking about 150 API calls, assuming we don't already have that agent and the user information. Then we pull in the like information on each one of those comments. You see how this compounds really, really, really quickly.
+
+Xyn Sun 37:19
+Yeah, I see public
+
+Andrew Miller 37:21
+scraping stuff, though,
+
+LSDan 37:24
+not off. Yeah, I'm just saying, if we're using tick API, if we're doing public scraping, this is why I'm saying, like, like, I haven't, I haven't gone yet. But the the result of my my research, is, yes, we can absolutely do almost all of the things we want to do through tech API, but
+
+Xyn Sun 37:41
+we should do public scraping, yes, yeah.
+
+LSDan 37:45
+Approach, yeah, yeah, public scraping
+
+Xyn Sun 37:47
+also doesn't, doesn't give you the users like comments. But I think that's fine,
+
+Andrew Miller 37:52
+yeah? I mean, I think API is unique and providing a good way like tick, API provides both public scraping and private authorized users. I think that it is commoditized and there's lots of other options available for public scraping. I am way more likely to think that there's not really other options besides tick API and doing it herself for the private authorized users info. So I would like it if we could still use tick API for 10s of 1000s of users for just their likes videos or liked comments list and probably rely on something else for
+
+LSDan 38:27
+public scraping, we'll be able to reasonably use it for anything that isn't an index. So like getting the user data right, and like their general stats, that's something that we could long pull, you know, once a day or whatever, and it would be reasonable cost, but it the the issue is not anything beyond just the 30 response limit, which is extremely low for the pagination. And just like the when you, when you iterate over anything of activity and then figure, you know, let's say that you've got a comment right that to get the data you're talking about, you're probably making at least three, maybe four or five calls per comment. And of course, like we get to cast some of that and, you know, more active users will already be cached and things like that, but, but at least in the beginning, we're going to hit that 10,000 limit cap, really, really, really quickly. So what we're going to have to do is sign up for a bunch of different accounts at 189 a month. So we probably need to spawn up, I would say, at least 10 accounts out of the gate to get any sort of reasonable test out of, out of that type of index scraping. So I think at that, at that point right, like we've got to really ask ourselves, if we're already just in a demo level, spending couple grand a month, then, you know, do we want to just, do we want to at least take a couple of days or a week to try to do the scraping ourselves and figure out how much of this we can reverse engineer, and how much trouble do we actually get into. Because it seems like that screenshot that you posted that showed what type of browser was logged in, that indicates to me that they don't have a lot of like, super sophisticated catching in place for, like, simulating an Android environment and then intercepting the responses. So that, that makes me think that if we can get someone to log in with OAuth, give us a token that actually works, and then use that token to actually to access the the private API layer, we are still going to have to maintain updating the private API layer every time it's it changes. But in this case, if we're trying to deal with big data at this level, that's probably the the the most reasonable way to do it.
+
+Andrew Miller 41:01
+And I would be concerned
+
+LSDan 41:02
+that rate too heavily on tick API, and then they, you know, the that API format changes or isn't as closely related to the Tick Tock API, we're going to be behind the scene. You know, behind, behind the curve. When we want to make that, that shift, we might, you know, need to migrate our data, or be missing some data, or, you know, any number of different things like that.
+
+Andrew Miller 41:28
+Were you making any distinction in there between like, public scraping tasks and like building an index of videos as opposed to just getting the like feeds? Because you mentioned like OAuth and users? But that's like only about the authorized things, which is the like to
+
+LSDan 41:43
+comment on me, yeah, that cost and that limitation applies to public endpoints as well as private endpoints in tech API.
+
+Andrew Miller 41:53
+Yeah, I get the limitation is there, but like, what I think we should be doing is for public scraping, we should be looking for other alternatives, because I think that there are other cost competitive alternatives for public endpoints. So I still am not clear if you think that for just the private endpoints, meaning the liked videos, if it's likely that we can use ticket like so they suppose we found a competing provider of public video scraping and indexing for Tiktok. Yeah,
+
+LSDan 42:19
+we can. We can, absolutely, I think we can use it, and I think we can get the information we need. We can't get direct likes, but we can get inferred likes, so And certainly we can capture the things that the user themselves have liked. And so the important thing with likes is actually volume of users, because we only get the information about the user from the user, so we need to get that network effect before we actually have the ingestion at a level where it's it's usable for anything real.
+
+Andrew Miller 42:57
+Hold on. Hold on. I think I'm misunderstood. I think I'm talking about something different, somehow, like, I'm talking about, like, giving a user that's logged in, can you pull the list of comments and videos that user has liked so that they liked a new comment, and then you can react to that comment being like, yes. I mean, that's not really a network effect, because the user who's going to receive the feedback from that feedback loop is also the one who generated that event
+
+LSDan 43:24
+in that very narrow example, yes, absolutely, we can do that. The more complicated examples that we've talked about with likes, which is almost everything beyond that, we can't do that without cross referencing the data and collecting large bits of data. Okay? And then
+
+Andrew Miller 43:44
+for the thing you said about getting like, 10 accounts in 389, a month, if it's just for the liked videos feedback loop I described, like, would that be overkill for that? Do you think like?
+
+LSDan 43:55
+It depends on the resolution, right? So you're long polling, which means you have one request per end period of time. So if you want to have any sort of response that feels real time, then let's say, on a per user basis, we're pulling, I don't know, 10 times an hour, 242 or 240, requests per day. So extrapolating that out, that means we can cover, you know, if we're doing nothing else with one account, we can cover like 40 new users. Am I doing that math right? Four users would be 1000 10,000 so 40,
+
+Andrew Miller 44:45
+okay, and this is still getting like updates only, like at the minutes level, like a few times an hour, rather
+
+LSDan 44:51
+than, yeah, this would be once every six minutes, and then that. That doesn't cover responding or processing or anything like that,
+
+Andrew Miller 45:00
+okay. But if we had 10 of those, and we could do it 10 times as often, and then it would be every minute, or like every 30
+
+LSDan 45:06
+seconds, well, I think we can still do it every minute. The their rate limiter is on a per day basis. So we could basically switch accounts the second we hit 10,000 and keep going, and then the only limitation would be the number of accounts that we have.
+
+Andrew Miller 45:26
+I think this sounds reasonable. I agree that this is only for what I'm now succeeded on is like a pretty narrow use case. But, I mean, if we wanted to have people who have logged into this iPhone app getting real time overlays, elections, you know, video based on stuff you've liked, then I got, I mean, it's way more fun if it's like, instantaneous. I guess it's a little bit tougher if it's like, you know, if you have to wait 30 seconds for the little comment overlay, then it won't be as timely. The video will have moved on that you just commented to or uploaded. But I guess it's probably still good. It's not terrible,
+
+LSDan 46:03
+yeah. And of course, like, we get to increase that resolution by, you know, we can, you know, we can say, like, there's all sorts of tuning things we can do, right? Like, if a user, we could, we could detect when the user is on Tick, tock, and then send an indicator to the back end saying the user is actively browsing Tiktok pay attention to what they're doing, and that would enable the long polling. And then we could pull once every 30 seconds, and because they wouldn't be on for that long, we wouldn't use anywhere near as many requests. So that type of thing is sounds good as possible, but, but we have to think about, how much of that engineering time do we want to spend on workarounds for using that pricey solution versus, you know, we pull the trigger and just build our own. And so the the the answer usually is like, how quickly are you going to reach the cost where you could have built it by yourself? And then how long is it going to take to build it? And that's usually the balance point. I would
+
+Andrew Miller 47:10
+imagine that it's likely we even just do something like decide to spend a week using take API, then spend a week trying to do our own take API, and if we have to pivot again, after spending a bit of time exploring each of those branches, then you know that's okay.
+
+LSDan 47:26
+Yeah, that makes
+
+Andrew Miller 47:29
+sense. Have been looking at, I wonder if you have an update now, because this week right on topic of this. But you were looking at this reverse engineered Tiktok API library that works specifically for Chinese Tiktok, and you were wondering whether it also works for us, that that's an avenue.
+
+Chuqiao Ren 47:45
+Yeah, I tried that. I think that one was not maintained anymore, so I couldn't even open up the server. So unfortunately, but I'm looking at the code. I think they're trying to do some reverse engineer on the official Tiktok API on the network. So I think maybe you can use this direction, or go further on this direction and train to do it on the American version of the Tiktok.
+
+Andrew Miller 48:12
+Okay, I want to talk this week with her. She promised he would send me his Calendly. But opacity network just hired someone who has reverse engineered the Tiktok VM mobile app, and so he seems to have a lot of info, and maybe is able to share resources with it. He mainly wanted to draw a distinction, which is that the mobile app is really sensitive, because you have to go through DRM to do any understanding of it, or reverse engineering of it. So like reverse engineering of that is, like legally dubious, in a way, that the web API is fair game. Anything the browser does is fair game, which is totally consistent, if we think that's how tick API works, and bodes really well for us being able to, potentially, just with his help, finish the reverse engineering of it, of the you know, of the browser based Tick, tock.com web app. So no, I mean, I'm leaning towards thinking that we should like, I mean, it seems like using kick API is not at all a problem for any of the prototyping from either things that Albion mentioned wants to do, or things that Shin mentioned, and clearly being able to build our own alternative to take API through understanding it better would be a good deal no matter what. And like, you know, make the difference between feasible and not feasible, probably pretty likely. It seems like it would be useful to make our own like, I do think that it'd be useful for us to make that own late, long polling converter. Like, my understanding is that take API lets you poll for like videos if we wanted to do something that is like a Pub Sub thing. Like, I start a long poll waiting to see if a user likes something new or like replies new or something like that. Then like that seems like the relevant thing that we would have to make as our own infra, basically because it would turn like a strategy for how frequently and what batches to pull the tick API, but it would turn it into long pole friendly things for downstream applications.
+
+LSDan 50:19
+Yeah, I think where the line is going to be is whenever we start talking about, like, sandbox environment, or like, a lot of data that we can introspect, that's going to be outside of the realm of what we can do with tic API, even in a kind of testing environment, because, yeah, the cost of pulling that data that even tested is going to be so high.
+
+Andrew Miller 50:43
+I'm curious Xyn and Chuqiao, if you haven't like, am I right in that claim I made that I think that public scraping is more widely commoditized, like take API has competitors for public scraping of videos, even just making like a big old index of like, all the Tiktok videos in the last minute, whereas I suspect that tick API has no real competitors when it comes to like getting access to user authorized by QR code. Is that right?
+
+Xyn Sun 51:17
+Yeah, you can. You can. Go ahead.
+
+Chuqiao Ren 51:20
+Yes, I don't really have answer yet. Xyn, go ahead.
+
+Xyn Sun 51:23
+Okay, so for the public, Tiktok screen, API, take API actually sponsors some of the GitHub packages, right? So, like, yeah, so, so, so, like, I think for public, there's a lot, but like, for the for Yeah, for the QR, I don't, I have not seen a competitor yet, and it makes sense that for the public one, there's a lot, because it's, You know, so many people run pause using that. I
+
+Xyn Sun 52:03
+and then the public one, like, for example, like the most popular on tick tock API, it just, it just asks you to insert your own accounts cookie into it. Just crave, right? So that's like, same as authorizing your own cookie. And I tried to reverse engineer it a little bit before, and yeah, I could get, like, your timeline using the cookie, yeah,
+
+Andrew Miller 52:34
+from a browser session, rather than, like, go through the QR code.
+
+Xyn Sun 52:38
+Yeah. I mean, the QR code is just like for you to log in on their servers after they can get your cookie, right, yeah, Yeah, yeah.
+
+Andrew Miller 52:58
+What do you think about the private history data feed. Like, I'm kind of attracted to this because it has this like ton of information, and it is, it's kind of like mixed Lurker friendly and not like it's Lurker friendly in the sense that you don't have to have posted anything for your history to be kind of interesting to draw insights from, not exactly Lurker friendly, and that it's like inconvenient no matter what, like, even if you sign over with the QR code to tick API, tic, API can't initiate a request for your data, zip file, like, you need to be logged in, and you also need to then respond to an email code. So it's just like, one click more inconvenient. I still think you could automate this with a headless browser, but like the user, no matter what, would have to reply to an email, so it's just like, more invasive. I think that the idea that the user could just do this themselves, and like I can imagine that the first entry point to the app is like, just by going through the QR code, it can now give you a feedback loop where it shows you something that is dynamic based on the videos you like, or, I guess you get the entire log of liked videos, so it can automatically fill out your alignment sheet based on liked videos, and it gets through tick API. But then further, if you ask them to like, we'll just go through this step to do your request, download your data, and then upload the zip file that's pretty straightforward, even though it takes like, a bunch more clicks. It's not super, not that sketchy. And you can upload the zip file from your phone like you would do that to then get, like, a much more interesting or detailed, or compatible with more variations, or something like extended version of the character alignment API. Like, what do you think about that? Especially the idea that, like, it's, no, it's not integrity guaranteed if the user just uploads it manually. But it is, like, I think a little more straightforward.
+
+Xyn Sun 54:52
+Well, I think you answered it yourself, right? It's like, you first get people hooked on, like, the easy onboarding version, which is like a video and getting something. And then if they're hooked, you redirect them to uploading to reach your version. Yeah. And how you have your hand up, yeah.
+
+Chuqiao Ren 55:14
+I think there's a tiny difficulty here. If you log, if you want to log on to web version of the department, you don't really have to go through the QR code. You can use like your Google, your Google account, or like Apple account, so it doesn't care, goes down like the blog. Oh,
+
+Andrew Miller 55:31
+but those are even harder than I mean, how would those work with from the headless browsers, you know, from a te Right? Like, if they want to, we want them to do this from our server, login through the web API, the QR code, one works because we can screen cap the uqr code and then send them somewhere else, like through our own website the QR code, that's like, how you're able to do this, like your tick API. Otherwise we'd also have to have them be logged into their Gmail account,
+
+Chuqiao Ren 56:03
+gotcha? Or you can, oh, I see that makes sense.
+
+Andrew Miller 56:14
+Yeah, if they've already, like, logged in with their entire gmail account to OAuth three, then we'd be able to do that step. But for now, we just have to, yeah, I think the QR code is the only
+
+Andrew Miller 56:32
+good way. I mean, with this in mind, do you think that like making a good pipeline for just getting users to sign up and let us see their list of videos and comments that they've liked is the most important thing to do, and that we could start doing that with tick API and like it seems like we have a choice of second priority of things, of either try to do our own alternative, to take API, or go further and try to do the history upload, and I guess the public scraping like, what's, what do you think is like, the priority role of like, public scraping support, then, like, is that kind of necessary to finish the loop on Shin your your application ideas? It seems like that was going to play a big role in Albion's ones as well. Well.
+
+Xyn Sun 57:24
+How does Caribbean, I think is fine, because there probably exists a lot of tools to it already. And, yeah, I Yeah, yeah, for public ones, I think, yeah, I don't think we necessarily need to start with it, because the public ones are like, public alpha, you know, it's like, it's kind of means to decay, yeah, so, so it kind of doesn't feel like a core portfolio that we grow. I mean,
+
+Andrew Miller 58:08
+the way that I've been thinking about it is that, like, by MeV analogy, it's like the private authorization is like our exclusive order flow. So that's like, yeah. But like, public mempool is still, like, Pivotal order flow, like, you can't be competitive if you don't do an adequate job. Like you can't just not have public mempool and build a block. So the public alpha is like, you have to do at least a ordinary, standard, good enough job of handling, you know, public alpha in order to be competitive, and then the proprietary edge, you know, will only be able to be shown. So, I mean, that's how I understand the like, basic competence of public scraping. But okay, I mean, it sounds like you have suggestions you could offer as well, either GitHub libraries sponsored by tick API, that's cool. That allow us to do it ourselves, like we start our own accounts, copy the cookies into an existing open source library, and that's enough to start doing scraping without click API. I mean, is the flow clear? Is it like we would listen to? I kind of don't know which one starts like lb thing has a specific thing where, like, it starts by looking at like, a global Tiktok query of like across Tiktok, what are the current most liked videos, and like that generates from nothing a list of video IDs and all the rest of the indexing is like spreading out from there, but that's really different than saying like users are going to sign up, and then we want to look At the list of videos that user has liked weeks in the past, even. I mean, we would then maybe have like a pool of video IDs from all throughout time, but they are. It's the union of all videos that users who have signed up with us have liked, and however many videos that is we need to like, crawl them like a semantic surviving.
+
+Xyn Sun 1:00:00
+Yes, yeah, yeah, yeah. There's a private, private stuff that I think is valuable to build. Yeah? For the public one, no, I see, I think just searching for training videos. Easy, easy, right? Like, for example, this one, like all people just use it. Have we tried this? By the way, this one uses cookie and, like, literally. The first example is getting, like, scraping trending videos. Yeah.
+
+Albiona Hoti 1:00:38
+Can you read it? Because for me, it doesn't show up. Yeah, it should stop now.
+
+Albiona Hoti 1:00:57
+I mean, isn't isn't this? Every vibe event. Isn't this that all of our apps will be based on the vibe events, in a way,
+
+Unknown 1:01:06
+yes, yeah.
+
+Andrew Miller 1:01:13
+Vibe events meaning, vibe events meaning public,
+
+Xyn Sun 1:01:17
+meaning private, actually, yeah,
+
+Andrew Miller 1:01:19
+you mean private. What do you mean by private? Authorized User? Or do you mean documented?
+
+Xyn Sun 1:01:25
+Yeah, document, like you authorized users, action, okay, yeah, yeah,
+
+Xyn Sun 1:01:38
+because I think, like the cool thing, as as news is like testing out their RL engine. It's like to do something that's like you can do, like a reverse search on the on the vibe that the agent has tested before, and then, like, see, oh, you want this kind of audience or this kind of reaction. Those are the vibes that are most likely to figure it, yeah, and then you can kind of run like, you know, mimetic experiments in public domains, and then migrate it to like the delegated users. I
+
+Xyn Sun 1:02:33
+Yeah, okay, do we Yeah? I think that's kind of it. Those could come later, honestly. So yeah,
+
+LSDan 1:02:43
+all right. So just to summarize, next step is to give people the ability to log in via the TIC API, and also use that token to use the public scraping capabilities and collect as much data as we possibly can when they log in, understanding that we're going to limit the number of requests that we make of API and limit our functionality to only things that are capable of being pulled from the public API, with the exception of just the minimal likes and things that can be long pulled when we know that the user is browsing Tiktok. Does that? Does that sound like a good summary of everything we just talked about
+
+Andrew Miller 1:03:34
+that sounded right to me. Yeah.
+
+LSDan 1:03:40
+All right, excellent. So we can continue to coordinate on that. I can take the first pass of pulling in, well, I'll put it this way, actually. Chuqiao, do you want to take on the first pass of building in the public API and merging those data. Would you like me to do it?
+
+Chuqiao Ren 1:04:05
+I think I can do that if I Okay, awesome.
+
+LSDan 1:04:07
+So let's check in, maybe in like 24 hours, and see how that that's going. Yeah, that's good.
+
+Andrew Miller 1:04:22
+I Can I ask about dev shops? Then I'm curious, just because I lost and you were talking to some dev shops and prepared a process for dev shops evaluation, and then shin and I think Tina, separately or together, I've lost track of which ones. Well, it's not entirely myself. I don't think anyone's written down exactly which ones, but you've talked to a few, and I think asked Dan for help evaluating some. But I guess I'm equally unsure what to be evaluating about them, and also exactly what it is that they would they would do if it's more like help with this, help with video production, help with public scraping, or help with just like app design, I mean rather iOS app implementation.
+
+Albiona Hoti 1:05:07
+Can I ask something quick before Xyn continues? I will meet Andrew Forman. Is there? Our interest is to have him on board to do YouTube related stuff, or just to stress test, what's, what's happening on his side and what's his interest in this, right?
+
+Xyn Sun 1:05:28
+Oh, yeah, yeah, he messaged. Let's see.
+
+Andrew Miller 1:05:35
+Yeah, he started with me a bit to catch up on as well. But yeah, I also don't know, I don't know what his availability or time he has that he wants to offer. I mean, in the past, he was working on YouTube, because that was he had his own interest in a specific app he wanted to do related to subdivide liquefying YouTube creator payouts. But I get the sense now that he's open for something else. I'm not sure. I'm not sure rich. I'm not sure what talent he wants to bring, whether he wants to be like, diving in and doing API analysis. My understanding wasn't that that's like, necessarily his strong suit, but just that he was going to try to stop, you know, solve that obstacle if it was in between him and the app that he wanted to make. But then my understanding is he didn't finish doing the app that he wanted to make, or undocking himself with it. So I don't know what the obstacle is or what he wants to help with here, I guess, open for ideas or suggestions.
+
+Xyn Sun 1:06:37
+He said it's a game that they're doing he
+
+Andrew Miller 1:06:42
+wants to do, is that what you mean?
+
+Xyn Sun 1:06:51
+I don't know. That's let's see. Okay, yeah, yeah, yeah. Andrew formula, I think just Yeah. Like, keep talking to him about, like his new app. He said, like, he's doing a side project on a game that could pair nicely with some loss, but he did her concepts. He asked me about AI CEO. So I think, yeah, something similar to that. Okay, so on my end, like, yeah, I've talked to like, two dev shops that are that are down to work. One of them needs, like, a very specific project, and they are more T infra oriented, so like, we need to come up with something the other is, the other is, like, infra background, yeah, I'm basically kind of, like, unsure of what was specific projects to give them.
+
+LSDan 1:08:12
+Yeah, I guess that's kind of where I'm stuck as well. There isn't really a clear thing to ask a dev shop for yet, and so I think we can, we can basically understand that there are dev shops valuable. We have interest. We know that, you know, there's a certain range for what a top end dev shop charges and in each country that we're looking for them in and and now, what we need is something concrete we can ask them to do, and then I think we could kind of go through a more thorough vetting procedure. But without that, here's what we want you to build. It's kind of hard to ask them to give us any information that's useful. Yeah,
+
+Andrew Miller 1:09:03
+if there's a te infrared dev team that's available to work, I mean, my first thought is just, oh, that sounds like a great resource. We shouldn't let go to waste. It shouldn't be hard to make useful work for D stack or other preparing related things, if that's really what their skill is and they want to do it, if it's extensive or takes all of our attention to deal with the dev team for a non priority thing, then I can see why. My reaction that, oh, that's a resource we should try to make an excuse to use, might not be right, but still, that's my first reaction. I mean, if this is a T info, like a T aware, like general back end, I'm assuming, more like specifically info, or are they like security, or where
+
+Xyn Sun 1:09:44
+Te aware backhand infra?
+
+Xyn Sun 1:09:52
+Yeah, the good dev shops are all like backhand infra. I feel like, yeah, sadly, haven't met like a strong front end or app.
+
+LSDan 1:10:05
+Front end tends to be individual devs or design studios, with Dev on stock on staff more than like actual shop focused on that. These days, in my experience, I have a couple good front end people that I could reach out to if we find ourselves in need of front end. But again, it's sort of like there's different people to reach out to for next than there is for, you know, a server, server side, Python app.
+
+Xyn Sun 1:10:39
+Yeah. Okay. I will, just like, make sure to follow up on all of those. What's Yeah. Do you have anything else to talk about? Andrew,
+
+Andrew Miller 1:10:57
+I did have one more thing over now I'm worried I'm forgetting all of a sudden, oh yeah, on the coordination stuff. I mean, I tried to run this by Tina. I talked with George about your interest in it a bit. And then I think Dan, you were following up on this too. But like the more that the info requirements are in focus, and even the app direction seems to be nearing some cohesion. I'm not really sure myself what to make about the specifics of goals or milestones or cutoff points or something with any of the specific coordination tasks this include both our internal automation, I guess, and Eliza things specifically, I guess. I was thinking this is a question for George and Dan, and that probably using Tina as an Oracle to set priorities or worthwhile things for this, like coordination technology development, seems like the right thing to do, but I don't have as much certainty or clarity there. I think at least George is okay. Was you want, like, another week or two at least to finish the Eliza oriented automation tasks that you already had. And I guess some, I mean, I know we're producing this telegram channel full of stuff, so I have in mind things that if agents or internal automation would do, I would think it's useful, like preparing those like Team summaries or automatically assigning action items to external collaborators. So I feel like I get like, in broad strokes, where some of the opportunity and exciting organs, the product stuff, is there, but I don't know how to say, like, how long will this take? Or, like, when would I expect the next iteration of that to be so? But I think George, you, even had, like, an update or a note of scope that you wanted to discuss and yeah, that's probably my first question
+
+George Zhang 1:12:48
+to George. Sure, yeah, actually, let me switch to my laptop. Perfect. I
+
+George Zhang 1:13:20
+Yeah, so, so when I'm switching to laptops, TLDR, there is like, we, I found, like a pretty good fits for the tools so that we can use, okay, okay, okay, I'm on my laptop, so, okay, yeah, so, so TLDR is like, so, if you guys watch the Google Cloud, you know conferences in Vegas weeks ago, they, yeah, it's actually they are pushing some internal toolings for Google workspace that will help us get 90% there, of course,
+
+Andrew Miller 1:14:14
+that agent to agent framework,
+
+George Zhang 1:14:17
+no nothing to do with that that feels more like a LinkedIn version of MCP. I, yeah, so, so, so, essentially, like, the idea is that, like, they're the one of the main product is called agent space here, yeah, so idea is that it's essentially exposing a bunch of functionality that's currently available, like Gemini search, Gemini deep research, then make it like it works with your private enterprise data. So that means, like, you can do deeper research and just sort of the whole flashbot X folder at it, and they, you know, help me, for example, draw timelines, or, like, make a chronicle of the evolutions of ideas related to this and that projects. Sure, yeah, yes, yes,
+
+Unknown 1:15:24
+yeah. So I'll share my screen. Can you guys see it?
+
+George Zhang 1:15:36
+Okay, cool. So, so this, this is going to get us, like a lot of the Tina asks so this will probably Get us like 80 to 70 to 80% there. I
+
+Unknown 1:16:22
+so What
+
+Andrew Miller 1:17:18
+like, very you can utilize Google
+
+George Zhang 1:17:23
+things? No, I think it's more like, you know, in terms of endpoints. You know, your regular Gemini is searching just google search right now, like it's kind of like doing enterprise search, right so it's more like about connecting, like connecting the Gemini to your private data sources. For example, in our case, it could be, you will essentially be like Google Drive, because we have most of our stuff there. So it's essentially doing the things you're currently doing, but with your private data, like, for example, deep research. Yeah,
+
+George Zhang 1:18:05
+uh, they're partners, basically, right? Um, so they have a list right now, and I still need to see the exact list, but, but things I think, like even just having Google Drive for us, like Google workspace, right, like Google Drive and the email related stuff will be like, I say, like, a decent chunk of the stuff, essentially, we kind of want to do so, but that for So, for this part, I chatted with, like, A Google mic, and with anything enterprise, it takes some time to deploy so but so projection for this project is essentially, if the timeline is not dragging on too long, I would want to try out, essentially, like, the boundary of these capabilities, and then like see how much you can do. And then like only, like do patchworks on top of it to actually make up whatever we need on top of what it already provides. But in the meantime, also like to show something else.
+
+Unknown 1:19:22
+Let me share a window on this. Okay, I'll just share screen.
+
+George Zhang 1:19:34
+So in the meantime, it's essentially
+
+Unknown 1:19:40
+Okay. I will share this.
+
+George Zhang 1:19:53
+Yeah, so, so this is kind of the idea the products of the essentially, the features I'm kind of going for is like you just kind of declare what you want, right? You for example, you know, this is general, yeah, Tracker projects, specific products. And then, like, you just, or you say, like, Okay, I want to keep track of all the external stakeholders, right? Like, so I think the analogy I made is that, like, you're kind of like you declaratively, like you're declaring a SQL query, right? Like, and then, for us, cases, there's new information flowing all the time, right? Like, through meetings, through, like, chatting with other people, sorry, or, like, update documents, right? But then, like, the idea is, like the system should take care of, like, aggregating, integrating new informations and always, essentially keeping track of giving you the most updated reports on whatever you wanted. So that's essentially the the end results I want. And then, like, some implementation details properly. And then, like, of course, like a Google agent space, we mentioned it, right? So it's gonna do a good chunk of stuff out of box itself, and then, like, probably not gonna get 100% there. And so that's kind of a long term stuff, like in the short terms. And this is probably also helpful for a bunch of stuff we're trying to do right? Essentially, for example, testing one thing that's for example, like, right. Let's say, you know, we want to keep track of, keep a tap of all the people, right? Sounds scary, huh? Right? So it's kind of because we work with a lot of, like, external stakeholders and say that, like, Okay, we have a lot of transcripts. How about like, we just go through all the transcript and get some insights on each person, right? Like their skill sets, what they're interested in, like, what project they're involved with, stuff like this. So they look like this. So then, like a media problems you run into is, of course, that's like the context, the window is just too big, right? So, yeah, so like, I can give you a look of running thing, right? So, like this probably runs through I know, like, 2030 files, right? And like inputs already, like, 40,000 Yeah, 40 Yeah, more than, like, actually 300,000 input tokens. So, so then, like, we also know, we all know that, like, a context sure, like, we have a million context window size models, but then, like, the performance is gonna degrade when you jam too much stuff inside, right? So the thing I'm doing is essentially just doing a simple map reduce, right? Idea is that you know, for map, you essentially are kind of extracting for each transcript where you're extracting, like a relevant people out of the transcript, right? Give some example. Something extracted can be this, let's say something more recent, right, right? So, like, it's kind of extracting out each person transcript, source dates, and then, like, summary of contribution, discussions, then topics, discussed, action items assigned. That's good. Decisions involved, opinion stances expressed, and interaction with other people. And then like, so this is kind of like the outputs of the map space, or the of the typical MapReduce. So we are all putting it for each person, this stuff, but also like Andrew. And then like, we are essentially just kind of runs, run them through each transcript. And then like, therefore the reduce phase, we're just going to, like, essentially merge, merge them, merge off them, like, into one big report, you know, on the person, like, Inferred roles, focus interactions, then key topics involved, consolidated action items, decisions involved, key stance opinions, key collaborator communication. But again, like this is like, what we mean by declarative, right? So you kind of just declare what you want, and then, like we do some simple map reduce. Doesn't really matter how many documents and the scripts transcripts we have. Like, we get the result we want process of them and merge them together. That's kind of like the big ideas and yeah, and also, like something cool.
+
+Unknown 1:25:38
+Oh shit, hopefully don't show something bad.
+
+George Zhang 1:25:42
+So, like, this is, like a pedantic log fire. Oh, yeah. So the idea here is essentially just kind of observability for this, kind of, like the long term batch actions for, you know, this ALM tasks, right? Like, because, like, with this time things you want observability, see what's going on. And so this one is pretty so essentially, right now, what we have is, like, you can see all the tag, of course, like, can make it, make it more legible, right? In terms like, okay, which exact file we are working on. But the cool thing here is that,
+
+Unknown 1:26:24
+for example,
+
+George Zhang 1:26:28
+you can essentially see, like, the conversation for each interaction with the agents, right? For here we're interacting with, like, with a meeting those agents, right? Let's say, okay, you can see all the interactions for each of these, right? And this is a user instruction, of course. And then like you can see also, like the outputs. So, yeah. So this can also come in, I imagine, can come in handy if we have any kind of, like, AI related workflows where we kind of want to have better observability into pretty convenient setups also, of course, giving the idea of the token to The amount of tokens. Yeah, and just good instrumentations, like, most of the stuff just works out of box. Oh shit, sorry, ignore this. Works out of box. You just instrument them and then, like, it just, a lot of it just kind of works. You, Will. Of course, you need to do some, like spans, some part of it, but a lot of these just works out of box, yeah, so which is pretty nice, and it's model agnostic, so you can work with any model. Yeah, that's the update from my side. Yeah. That
+
+Unknown 1:28:01
+was
+
+Andrew Miller 1:28:10
+a really great tour. I'm not sure I actually even want to ask, is there any input that you want in particular, like, this,
+
+George Zhang 1:28:32
+actually, like, yeah. So the thing I'm gonna do is that I'm going to, like, pump out the like, the reduce, reduce report. Like, essentially, that's, that's going to be like, okay, you know the kind of profiles for the people, that's kind of first phase, right? Deliverable, right? We want to be able to extract information about people out of it. But then, like, I think one very helpful thing is that, like, oh, we want to be able to test, essentially, how flexible is this kind of flow, right? And, and, like, we mentioned the declarative part, right? So we can just kind of, kind of brainstorm a bit like, what kind of stuff you guys want to extract, like, let's say we just right now, or focus on transcripts, right? And you can give me, essentially, okay, what's the final you know, like insights, knowledge, information, you want to extract it out of it, and we can just kind of see test the generalizability of this kind of mapper, useful, right? One obvious thing I'm thinking on top of my head when it's people, of course, and then the other is, like projects, right? But then maybe there are other stuff. So yeah,
+
+LSDan 1:29:52
+maybe it would make sense to have like a working session with each one of us that you could set up where we just sort of run through some of our own desired information extraction, and you can sort of test it.
+
+Unknown 1:30:09
+Yeah, that would be great. Yeah,
+
+LSDan 1:30:12
+awesome. Why don't you send out a request? Or like,
+
+Unknown 1:30:20
+George, oh, yeah, yes, yes, yes, sounds good. Yeah, let's do that.
+
+Andrew Miller 1:30:36
+I have nothing else.
+
+LSDan 1:30:39
+I have nothing else, either. All right, thanks, everyone, that's it. Bye, bye.
+
+This transcript was generated by https://otter.ai
+
