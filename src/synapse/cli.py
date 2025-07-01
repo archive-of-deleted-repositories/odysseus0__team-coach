@@ -237,9 +237,9 @@ def notify(
     if bot_token is None:
         bot_token = settings.telegram_notifier.bot_token
     if chat_id is None:
-        chat_id = settings.telegram_notifier.chat_id
+        chat_id = settings.telegram_notifier.target.id
     if thread_id is None:
-        thread_id = settings.telegram_notifier.thread_id
+        thread_id = settings.telegram_notifier.target.topic_id
     
     success = send_telegram_notification(message, bot_token, chat_id, thread_id)
     

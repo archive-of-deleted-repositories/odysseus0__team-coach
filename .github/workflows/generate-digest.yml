@@ -118,7 +118,7 @@ jobs:
           DIGEST_FILE="digest_${DIGEST_DATE}.md"
           
           # Run Claude with the agent prompt to write the digest
-          claude -p "Execute the provided instructions and write the complete digest to a file named '$DIGEST_FILE'" \
+          claude --model sonnet -p "Execute the provided instructions and write the complete digest to a file named '$DIGEST_FILE'" \
             --allowedTools "LS" "Read" "Write" < ../demo_agentic_newsletter/newsletter_agent_prompt.md
           
           # Verify output was created
