@@ -39,8 +39,8 @@ typeCheckingMode = "strict"
 reportUnnecessaryTypeIgnoreComment = true
 include = ["src/synapse/**/*.py"]
 venvPath = ".venv"
-# Exclude telegram exporter from strict checking due to untyped telethon library
-exclude = ["src/synapse/exporters/telegram.py"]
+# Exclude telegram-related files from type checking due to untyped telethon library
+exclude = ["src/synapse/exporters/telegram.py", "src/synapse/cli.py"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

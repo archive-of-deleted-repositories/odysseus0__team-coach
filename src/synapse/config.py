@@ -1,7 +1,6 @@
 """Configuration for Synapse Pipeline using Pydantic settings."""
 
 from pathlib import Path
-from typing import Any, Tuple, Type
 
 from pydantic import BaseModel, Field
 from pydantic_settings import (
@@ -75,12 +74,12 @@ class Settings(BaseSettings):
     @classmethod
     def settings_customise_sources(
         cls,
-        settings_cls: Type[BaseSettings],
+        settings_cls: type[BaseSettings],
         init_settings: PydanticBaseSettingsSource,
         env_settings: PydanticBaseSettingsSource,
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
-    ) -> Tuple[PydanticBaseSettingsSource, ...]:
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
         """
         Customize settings sources to include TOML file.
         

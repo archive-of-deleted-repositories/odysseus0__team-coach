@@ -28,9 +28,6 @@ def transform_telegram(
     # Use defaults from settings if not provided
     if topic_mapping is None:
         topic_mapping = Path(settings.telegram.topic_mapping_file)
-    elif not isinstance(topic_mapping, Path):
-        # Handle case where topic_mapping might be a boolean or string
-        topic_mapping = None
     
     if output_file is None:
         output_file = Path(settings.telegram.output_dir) / f'{input_file.stem}.md'
@@ -238,8 +235,8 @@ def notify(
         bot_token = settings.telegram_notifier.bot_token
     if chat_id is None:
         chat_id = settings.telegram_notifier.target.id
-    if thread_id is None:
-        thread_id = settings.telegram_notifier.target.topic_id
+    if thread_id is None and settings.telegram_notifier.target.topic_id is not None:
+        thread_id = str(settings.telegram_notifier.target.topic_id)
     
     success = send_telegram_notification(message, bot_token, chat_id, thread_id)
     
@@ -287,11 +284,16 @@ def find_telegram_topics(
         typer.echo('Please set SYNAPSE_TELEGRAM__SESSION_STRING', err=True)
         raise typer.Exit(1)
     
+    # Type narrowing: after the checks above, these are guaranteed to be non-None
+    api_id = settings.telegram.api_id
+    api_hash = settings.telegram.api_hash
+    session_string = settings.telegram.session_string
+    
     async def find_topics():
         client = TelegramClient(
-            StringSession(settings.telegram.session_string),
-            settings.telegram.api_id,
-            settings.telegram.api_hash
+            StringSession(session_string),
+            api_id,
+            api_hash
         )
         
         await client.start()
@@ -592,7 +594,7 @@ Status: `OPERATIONAL`"""
             'Testing topic/thread notification 🎯',
             bot_token=bot_token,
             chat_id=chat_id,
-            thread_id=settings.telegram_notifier.target.topic_id
+            thread_id=str(settings.telegram_notifier.target.topic_id)
         )
         typer.echo(f'Result: {"✅ Success" if result else "❌ Failed"}\n')
     
@@ -625,6 +627,7 @@ def generate_telegram_session(
         📋 Paste it into your .env file or password manager
     """
     import asyncio
+
     from telethon import TelegramClient
     from telethon.sessions import StringSession
     
@@ -642,15 +645,19 @@ def generate_telegram_session(
         typer.echo('❌ Error: Invalid output method. Use --output=clipboard or --output=env', err=True)
         raise typer.Exit(1)
     
+    # Type narrowing: after the check above, these are guaranteed to be non-None
+    api_id = settings.telegram.api_id
+    api_hash = settings.telegram.api_hash
+    
     async def generate():
         typer.echo('🔐 Generating Telegram session string...')
-        typer.echo(f'Using API_ID: {settings.telegram.api_id}\n')
+        typer.echo(f'Using API_ID: {api_id}\n')
         
         try:
             client = TelegramClient(
                 StringSession(),
-                settings.telegram.api_id,
-                settings.telegram.api_hash
+                api_id,
+                api_hash
             )
             
             await client.start()

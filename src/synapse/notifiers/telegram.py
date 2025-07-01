@@ -22,7 +22,7 @@ def send_telegram_notification(
     
     params = {'chat_id': chat, 'text': message, 'parse_mode': 'Markdown'}
     if thread:
-        params['message_thread_id'] = thread
+        params['message_thread_id'] = str(thread)
     
     response = httpx.post(
         f'https://api.telegram.org/bot{token}/sendMessage',

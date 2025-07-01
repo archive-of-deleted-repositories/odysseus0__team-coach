@@ -102,19 +102,19 @@ service_account_file = {self.service_account_path}
         
         # Parse file list
         try:
-            files = json.loads(result['stdout']) if result['stdout'].strip() else []
+            files: list[dict[str, Any]] = json.loads(result['stdout']) if result['stdout'].strip() else []
         except json.JSONDecodeError:
             logger.error(f"Failed to parse JSON: {result['stdout']}")
             return []
         
-        downloaded_files = []
+        downloaded_files: list[Path] = []
         
         # Download each file
         for file_info in files:
             if file_info.get('IsDir', False):
                 continue
             
-            file_path = file_info['Path']
+            file_path = str(file_info['Path'])
             local_path = output_dir / file_path
             local_path.parent.mkdir(parents=True, exist_ok=True)
             
