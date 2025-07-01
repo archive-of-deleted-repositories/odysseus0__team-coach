@@ -174,7 +174,12 @@ jobs:
           SYNAPSE_TELEGRAM_NOTIFIER__BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
           DIGEST_FILE="outputs/digest_$(date +%Y-%m-%d).md"
-          uv run synapse-pipeline notify "$(cat "$DIGEST_FILE")"
+          
+          # Read the full digest content
+          DIGEST_CONTENT=$(cat "$DIGEST_FILE")
+          
+          # Send the full digest with markdown formatting
+          uv run synapse-pipeline notify "$DIGEST_CONTENT"
       
       - name: Workflow Summary
         run: |
