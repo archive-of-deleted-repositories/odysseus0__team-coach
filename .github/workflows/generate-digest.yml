@@ -34,6 +34,15 @@ permissions:
   contents: read
   actions: write
 
+# Non-sensitive configuration
+env:
+  # Telegram channel IDs to export from (comma-separated)
+  TELEGRAM_CHANNEL_IDS: ""  # Add your channel IDs here, e.g., "-1001234567890,-1009876543210"
+  
+  # Notification target (if using bot notifications)
+  TELEGRAM_CHAT_ID: ""      # Add your chat/group ID here, e.g., "-1002682777986"
+  TELEGRAM_THREAD_ID: ""    # Add thread ID if using topics, e.g., "2457"
+
 jobs:
   generate-digest:
     name: Generate Team Digest
@@ -79,7 +88,7 @@ jobs:
           SYNAPSE_TELEGRAM__API_ID: ${{ secrets.TELEGRAM_API_ID }}
           SYNAPSE_TELEGRAM__API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           SYNAPSE_TELEGRAM__SESSION_STRING: ${{ secrets.TELEGRAM_SESSION_STRING }}
-          SYNAPSE_TELEGRAM__CHANNEL_IDS: ${{ secrets.TELEGRAM_CHANNEL_IDS }}
+          SYNAPSE_TELEGRAM__CHANNEL_IDS: ${{ env.TELEGRAM_CHANNEL_IDS }}
         run: |
           # Calculate date range
           START_DATE=$(date -d "${{ github.event.inputs.start_days_ago || '7' }} days ago" +%Y-%m-%d)
@@ -188,8 +197,8 @@ jobs:
         if: ${{ github.event.inputs.skip_notify != 'true' && github.event.inputs.skip_upload != 'true' }}
         env:
           SYNAPSE_TELEGRAM_NOTIFIER__BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          SYNAPSE_TELEGRAM_NOTIFIER__CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          SYNAPSE_TELEGRAM_NOTIFIER__THREAD_ID: ${{ secrets.TELEGRAM_THREAD_ID }}
+          SYNAPSE_TELEGRAM_NOTIFIER__TARGET__ID: ${{ env.TELEGRAM_CHAT_ID }}
+          SYNAPSE_TELEGRAM_NOTIFIER__TARGET__TOPIC_ID: ${{ env.TELEGRAM_THREAD_ID }}
         run: |
           echo "📨 Sending Telegram notification"
           
