@@ -5,7 +5,7 @@ Week of April 28, 2025
 ## Coordination
 
 [13:18] LSDan🏴‍☠️: https://pastebin.com/dpLiwzbR
-[17:09] Andrew Miller: @ujval had a chat w/ the guy from Graze, @flashbots_x @sxysun maybe we could talk together  
+[17:09] Andrew Miller: @ujval had a chat w/ the guy from Graze, @flashbots_x @sxysun maybe we could talk together
 https://calendly.com/devin-graze
 
 ## General
@@ -27,7 +27,7 @@ playing around with mini scripts, and im going to share my current usecase and h
 [14:26] Andrew Miller: there's a PR existing for automating respond to catpcha https://github.com/davidteather/TikTok-Api/pull/1235 [❤]
 [14:31] Andrew Miller: this guy is great https://www.youtube.com/@DavidTeatherCodes/videos [👍]
 [15:21] albicodes: https://x.com/tweemdotlol?s=21&t=NXUc-n2I3sgFIVMb8xRpKQ
-[16:04] Andrew Miller: https://www.linkedin.com/in/gregory-bizup/ this guy from sadcaptcha is wearing the same shirt as the david teather guy 
+[16:04] Andrew Miller: https://www.linkedin.com/in/gregory-bizup/ this guy from sadcaptcha is wearing the same shirt as the david teather guy
 
 intresting, he works for the US Navy now 🕵‍♂️
 [21:27] Tina @Pirate$HIP: it's absolutely fascinating to pet my ChatGPT to explain Flashapps and Flashblocks to different persona
@@ -66,7 +66,7 @@ https://docs.google.com/presentation/d/1cReZw9Pn8JC1pNOYBsJ6hmNZsbO61wBlyCO8V04h
 [08:50] albicodes: @socrates1024_1 our points of discussion today
 1. current one single page of the main product to be developed review
 2. flashbots forum post on "my" experience with pirateships, ive been talking to Fred and the idea you and tina gave me on this, so working on this one, need some feedback on the structure and what not
-3. coordination swarm of agents review 
+3. coordination swarm of agents review
 
 I proposed the call to be 30 min earlier, let me know if its good
 [14:33] Andrew Miller: @odysseus0z @rchuqiao able to join
@@ -107,7 +107,7 @@ if you watch till the end where they talk about agent server, i think OAuth3 can
 [12:44] LSDan🏴‍☠️: $189/m for that... we would need 1 key per 10 actively tracked users
 [12:45] LSDan🏴‍☠️: Highly active users would need their own key
 [12:45] LSDan🏴‍☠️: almost definitely in the cheaper to build it ourselves category if we're looking at 10m users [💯]
-[12:55] Andrew Miller: i wonder what that would look like security wise, as long as there's no risk of sharing credentials/private data with such service. 
+[12:55] Andrew Miller: i wonder what that would look like security wise, as long as there's no risk of sharing credentials/private data with such service.
 
  like i wonder if they rely on letting you give teamviewer access to a machine... if its anything better than that
 [12:56] Andrew Miller: hmm.. they have python client compatible w/ playwright (that would work well with browser-use in dstack), as well as browser extension (which is pretty much full control unless it's open source)
@@ -121,7 +121,7 @@ https://github.com/davidteather/TikTok-Api
 
 they proudly list TikAPI as a project sponsor, so i think this is the one @chuqiao meant [❤]
 [11:25] Andrew Miller: [Photo] [❤‍🔥]
-[11:32] Andrew Miller: [Photo] @albicodes 
+[11:32] Andrew Miller: [Photo] @albicodes
 
 *Tiktok Uploader*
 
@@ -142,7 +142,7 @@ https://github.com/davidteather/TikTok-Api/blob/main/TikTokApi/tiktok.py#L190 [�
 [13:51] Chuqiao: https://quick-hibiscus-a45.notion.site/CCF-Backend-API-Service-RFC-1e633e8caf96805a928ac1d00607e3b7 @socrates1024_1 @LSDan_DeFi
 [13:59] LSDan🏴‍☠️: @rchuqiao can we bump the call by 1 hour?
 [13:59] Andrew Miller: i have to be on a thesis defense committee in 1hr ^_^
-[14:00] Andrew Miller: quick note: 
+[14:00] Andrew Miller: quick note:
 - tikapi vs tiktok api, i think you're either using them interchangeably or mixing thm?
 - can we add pub/sub for new videos added to liked/saved list?
 [14:00] Chuqiao: maybe we can review it async and put comments to the doc? [👍]
@@ -155,7 +155,7 @@ Do you mean we need to call tikapi and monitor user's like/save list? So when us
 https://www.notion.so/comment-creator-fund-CCF-TikTok-Data-Requirements-and-API-Analysis-Report-1df773cdb47b800395b9f1ca6f9ef70a?pvs=4#1df773cdb47b8031a409eab78f44fa31
 
 @rchuqiao let me know if this list makes sense
-[14:26] albicodes: new project idea: 
+[14:26] albicodes: new project idea:
 
 - FlashApp/iMessage Bot Export (Paid):
     - Users send video links to a FlashApp or iMessage bot.
@@ -163,7 +163,7 @@ https://www.notion.so/comment-creator-fund-CCF-TikTok-Data-Requirements-and-API-
     - Access gated behind a payment layer.
 
 this targets people who save the videos on the bookmarks -> we could literally also "export" their bookmarked videos through a paid layer
-[14:37] albicodes: Andrew soho is working on a proposal on what he wants to work on and present to Andrew and Tina, thats what he shared yesterday and we were brainstorming things on what he's excited the most about with dmarz 
+[14:37] albicodes: Andrew soho is working on a proposal on what he wants to work on and present to Andrew and Tina, thats what he shared yesterday and we were brainstorming things on what he's excited the most about with dmarz
 
 on my side, andrew soho was asking very good questions and what not, but its not that i got much out of it other than more clarity on what type of users im targetting with the comment creator fund, which is very valuable i'd say
 
@@ -171,7 +171,7 @@ met cnode yesterday, he still wants to do the hush markets so he stops his twitt
 
 he shared some good feedback on my ideas, and the comment creator fund stood out the most for him because: i am generating videos on tiktok based on users comments, and he said:
 
-If users' comment goes viral, the AI agent turns it into a video and tags you with a link to claim your ✨cut ✨ - the more the video pops off, the more you earn, no sign-up, just instant clout and cash 
+If users' comment goes viral, the AI agent turns it into a video and tags you with a link to claim your ✨cut ✨ - the more the video pops off, the more you earn, no sign-up, just instant clout and cash
 
 as my first layer of the tiktok ai agent account which you can read more about it here: https://bevel-attempt-f20.notion.site/Comment-Creator-Fund-FlashApp-MVP-1e5773cdb47b80318f4bd3e036faea1d?pvs=4
 

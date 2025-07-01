@@ -28,6 +28,9 @@ def transform_telegram(
     # Use defaults from settings if not provided
     if topic_mapping is None:
         topic_mapping = Path(settings.telegram.topic_mapping_file)
+    elif not isinstance(topic_mapping, Path):
+        # Handle case where topic_mapping might be a boolean or string
+        topic_mapping = None
     
     if output_file is None:
         output_file = Path(settings.telegram.output_dir) / f'{input_file.stem}.md'
@@ -42,7 +45,7 @@ def transform_telegram(
             telegram_data = json.load(f)
         
         # Load topic mapping
-        topic_map = load_topic_mapping(str(topic_mapping)) if topic_mapping.exists() else {}
+        topic_map = load_topic_mapping(str(topic_mapping)) if topic_mapping and topic_mapping.exists() else {}
         
         # Parse the export
         parsed_data = parse_telegram_export(telegram_data, topic_map)
@@ -80,7 +83,13 @@ def batch_transform(
     
     for json_file in json_files:
         output_file = output_dir / f'{json_file.stem}.md'
-        transform_telegram(json_file, output_file)
+        try:
+            transform_telegram(json_file, output_file, topic_mapping=None)
+        except Exception as e:
+            typer.echo(f'❌ Error processing {json_file}: {e}', err=True)
+            import traceback
+            traceback.print_exc()
+            raise
 
 
 @app.command()
@@ -656,9 +665,9 @@ def generate_telegram_session(
             if output == 'clipboard':
                 try:
                     import pyperclip
-                    pyperclip.copy(f'SYNAPSE_TELEGRAM__SESSION_STRING={session_string}')
-                    typer.echo('📋 Copied to clipboard! Paste it into your .env file or password manager')
-                    typer.echo('💡 Tip: The clipboard now contains the full line ready to paste into .env')
+                    pyperclip.copy(session_string)
+                    typer.echo('📋 Session string copied to clipboard!')
+                    typer.echo('📋 Paste it into your password manager or GitHub secrets')
                     success = True
                 except Exception as e:
                     typer.echo(f'⚠️  Could not copy to clipboard: {e}', err=True)
