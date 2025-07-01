@@ -591,7 +591,9 @@ Status: `OPERATIONAL`"""
 
 
 @doctor_app.command('generate-session')
-def generate_telegram_session():
+def generate_telegram_session(
+    output: str = typer.Option('clipboard', '--output', '-o', help='Output method: clipboard or env'),
+):
     """Generate a Telegram session string for API access.
     
     This is a one-time setup to authenticate your Telegram account
@@ -610,10 +612,8 @@ def generate_telegram_session():
         Please enter your phone (or bot token): +1234567890
         Please enter the code you received: 12345
         
-        ✅ Session string generated successfully!
-        
-        Add this to your .env file:
-        SYNAPSE_TELEGRAM__SESSION_STRING=1AZWarzUBu...
+        ✅ Session string copied to clipboard!
+        📋 Paste it into your .env file or password manager
     """
     import asyncio
     from telethon import TelegramClient
@@ -629,6 +629,10 @@ def generate_telegram_session():
         typer.echo('\nGet these from: https://my.telegram.org/apps', err=True)
         raise typer.Exit(1)
     
+    if output not in ['clipboard', 'env']:
+        typer.echo('❌ Error: Invalid output method. Use --output=clipboard or --output=env', err=True)
+        raise typer.Exit(1)
+    
     async def generate():
         typer.echo('🔐 Generating Telegram session string...')
         typer.echo(f'Using API_ID: {settings.telegram.api_id}\n')
@@ -642,12 +646,51 @@ def generate_telegram_session():
             
             await client.start()
             session_string = client.session.save()
+            await client.disconnect()
             
             typer.echo('\n✅ Session string generated successfully!')
-            typer.echo('\nAdd this to your .env file:')
-            typer.echo(f'SYNAPSE_TELEGRAM__SESSION_STRING={session_string}')
             
-            await client.disconnect()
+            # Handle different output methods
+            success = False
+            
+            if output == 'clipboard':
+                try:
+                    import pyperclip
+                    pyperclip.copy(f'SYNAPSE_TELEGRAM__SESSION_STRING={session_string}')
+                    typer.echo('📋 Copied to clipboard! Paste it into your .env file or password manager')
+                    typer.echo('💡 Tip: The clipboard now contains the full line ready to paste into .env')
+                    success = True
+                except Exception as e:
+                    typer.echo(f'⚠️  Could not copy to clipboard: {e}', err=True)
+                    typer.echo('Falling back to .env file method...\n')
+            
+            if output == 'env' or (output == 'clipboard' and not success):
+                # Append to .env file
+                env_line = f'\nSYNAPSE_TELEGRAM__SESSION_STRING={session_string}\n'
+                
+                if Path('.env').exists():
+                    # Check if already exists
+                    env_content = Path('.env').read_text()
+                    if 'SYNAPSE_TELEGRAM__SESSION_STRING' in env_content:
+                        typer.echo('⚠️  SYNAPSE_TELEGRAM__SESSION_STRING already exists in .env')
+                        if typer.confirm('Do you want to update it?'):
+                            # Replace existing line
+                            import re
+                            new_content = re.sub(
+                                r'^SYNAPSE_TELEGRAM__SESSION_STRING=.*$',
+                                f'SYNAPSE_TELEGRAM__SESSION_STRING={session_string}',
+                                env_content,
+                                flags=re.MULTILINE
+                            )
+                            Path('.env').write_text(new_content)
+                            typer.echo('✅ Updated session string in .env file')
+                    else:
+                        # Append new line
+                        with open('.env', 'a') as f:
+                            f.write(env_line)
+                        typer.echo('✅ Added session string to .env file')
+                else:
+                    typer.echo('⚠️  No .env file found. Create one first with: cp .env.example .env')
             
         except Exception as e:
             typer.echo(f'\n❌ Error: {e}', err=True)
