@@ -304,6 +304,12 @@ wheels = [
 ]
 
 [[package]]
+name = "pyperclip"
+version = "1.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/30/23/2f0a3efc4d6a32f3b63cdff36cd398d9701d26cda58e3ab97ac79fb5e60d/pyperclip-1.9.0.tar.gz", hash = "sha256:b7de0142ddc81bfc5c7507eea19da920b92252b548b96186caf94a5e2527d310", size = 20961, upload-time = "2024-06-18T20:38:48.401Z" }
+
+[[package]]
 name = "pyright"
 version = "1.1.402"
 source = { registry = "https://pypi.org/simple" }
@@ -485,6 +491,7 @@ dependencies = [
     { name = "httpx" },
     { name = "pydantic" },
     { name = "pydantic-settings", extra = ["toml"] },
+    { name = "pyperclip" },
     { name = "python-dateutil" },
     { name = "telethon" },
     { name = "typer" },
@@ -505,6 +512,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.25.0" },
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "pydantic-settings", extras = ["toml"], specifier = ">=2.0.0" },
+    { name = "pyperclip", specifier = ">=1.8.2" },
     { name = "python-dateutil", specifier = ">=2.8.0" },
     { name = "telethon", specifier = ">=1.35.0" },
     { name = "typer", specifier = ">=0.15.4" },
