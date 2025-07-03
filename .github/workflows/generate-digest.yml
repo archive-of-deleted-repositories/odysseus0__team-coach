@@ -131,6 +131,7 @@ jobs:
           path: gdrive_data/
           retention-days: 7
           compression-level: 6
+          if-no-files-found: ignore
       
       - name: Set Export Status
         id: export-status
@@ -205,9 +206,15 @@ jobs:
       
       - name: Download Google Drive Data
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: gdrive-data-${{ github.run_id }}
           path: gdrive_data/
+      
+      - name: Create empty gdrive_data if needed
+        run: |
+          mkdir -p gdrive_data
+          echo "Ensured gdrive_data directory exists (may be empty, which is normal)"
       
       - name: Prepare prompt
         run: |
