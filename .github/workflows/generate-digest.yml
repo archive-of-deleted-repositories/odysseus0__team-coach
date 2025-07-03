@@ -66,7 +66,7 @@ jobs:
       - name: Cache rclone
         uses: actions/cache@v4
         with:
-          path: /usr/local/bin/rclone
+          path: /usr/bin/rclone
           key: rclone-${{ runner.os }}-${{ steps.date.outputs.week }}
           restore-keys: |
             rclone-${{ runner.os }}-
@@ -82,7 +82,7 @@ jobs:
       
       - name: Install rclone
         run: |
-          if [ ! -f /usr/local/bin/rclone ]; then
+          if [ ! -f /usr/bin/rclone ]; then
             echo "Installing rclone (cache miss)..."
             curl https://rclone.org/install.sh | sudo bash
           else
