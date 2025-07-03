@@ -51,16 +51,47 @@ jobs:
         with:
           python-version: '3.12'
       
+      # Install uv with built-in caching
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      
+      # Get current week for weekly cache refresh
+      - name: Get current week
+        id: date
+        run: echo "week=$(date +'%Y-W%U')" >> $GITHUB_OUTPUT
+      
+      # Cache rclone (weekly refresh)
+      - name: Cache rclone
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/rclone
+          key: rclone-${{ runner.os }}-${{ steps.date.outputs.week }}
+          restore-keys: |
+            rclone-${{ runner.os }}-
+      
+      # Cache Claude CLI (weekly refresh)
+      - name: Cache Claude CLI
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: claude-cli-${{ runner.os }}-${{ steps.date.outputs.week }}
+          restore-keys: |
+            claude-cli-${{ runner.os }}-
+      
       - name: Install rclone
         run: |
-          curl https://rclone.org/install.sh | sudo bash
+          if [ ! -f /usr/local/bin/rclone ]; then
+            echo "Installing rclone (cache miss)..."
+            curl https://rclone.org/install.sh | sudo bash
+          else
+            echo "Using cached rclone"
+          fi
           rclone version
       
       - name: Install Dependencies
-        run: |
-          pip install --upgrade pip
-          pip install uv
-          uv sync
+        run: uv sync
       
       - name: Setup Google Drive Service Account
         run: |
@@ -96,7 +127,14 @@ jobs:
       
       # Install Claude CLI
       - name: Install Claude CLI
-        run: npm install -g @anthropic-ai/claude-code
+        run: |
+          if ! command -v claude &> /dev/null; then
+            echo "Installing Claude CLI (cache miss)..."
+            npm install -g @anthropic-ai/claude-code
+          else
+            echo "Using cached Claude CLI"
+          fi
+          claude --version
           
       # Generate digest using Claude CLI
       - name: Generate Team Digest
