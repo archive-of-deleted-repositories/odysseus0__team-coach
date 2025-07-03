@@ -1,0 +1,30 @@
+name: 'Setup rclone'
+description: 'Setup rclone with weekly caching'
+runs:
+  using: 'composite'
+  steps:
+    # Get current week for weekly cache refresh
+    - name: Get current week
+      id: date
+      shell: bash
+      run: echo "week=$(date +'%Y-W%U')" >> $GITHUB_OUTPUT
+    
+    # Cache rclone (weekly refresh)
+    - name: Cache rclone
+      uses: actions/cache@v4
+      with:
+        path: /usr/bin/rclone
+        key: rclone-${{ runner.os }}-${{ steps.date.outputs.week }}
+        restore-keys: |
+          rclone-${{ runner.os }}-
+    
+    - name: Install rclone
+      shell: bash
+      run: |
+        if [ ! -f /usr/bin/rclone ]; then
+          echo "Installing rclone (cache miss)..."
+          curl https://rclone.org/install.sh | sudo bash
+        else
+          echo "Using cached rclone"
+        fi
+        rclone version

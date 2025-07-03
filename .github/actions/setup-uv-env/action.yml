@@ -1,0 +1,13 @@
+name: 'Setup uv and Python'
+description: 'Setup uv with caching and install dependencies (Python managed by uv)'
+runs:
+  using: 'composite'
+  steps:
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+    
+    - name: Install Dependencies
+      shell: bash
+      run: uv sync
