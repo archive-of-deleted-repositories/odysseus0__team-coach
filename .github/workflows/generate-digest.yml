@@ -103,8 +103,10 @@ jobs:
       - name: Setup uv Environment
         uses: ./.github/actions/setup-uv-env
       
-      - name: Setup rclone
-        uses: ./.github/actions/setup-rclone
+      - name: Install rclone
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+          rclone version
       
       - name: Setup Google Drive Service Account
         run: |
@@ -289,8 +291,10 @@ jobs:
       - name: Setup uv Environment
         uses: ./.github/actions/setup-uv-env
       
-      - name: Setup rclone
-        uses: ./.github/actions/setup-rclone
+      - name: Install rclone
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+          rclone version
       
       - name: Setup Google Drive Service Account
         run: |
