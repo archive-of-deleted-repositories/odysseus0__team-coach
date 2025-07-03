@@ -35,11 +35,76 @@ permissions:
   actions: write
 
 jobs:
-  generate-digest:
-    name: Generate Team Digest
+  # Job 1: Export Telegram Data (Parallel)
+  export-telegram:
+    name: Export Telegram Data
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    
+    timeout-minutes: 10
+    outputs:
+      telegram-status: ${{ steps.export-status.outputs.status }}
+      message-count: ${{ steps.export-status.outputs.count }}
+      date-range: ${{ steps.export-status.outputs.date-range }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      # Install uv with built-in caching
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      
+      - name: Install Dependencies
+        run: uv sync
+      
+      # Export Telegram data
+      - name: Export Telegram Messages
+        env:
+          SYNAPSE_TELEGRAM__API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          SYNAPSE_TELEGRAM__API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          SYNAPSE_TELEGRAM__SESSION_STRING: ${{ secrets.TELEGRAM_SESSION_STRING }}
+        run: |
+          START_DATE=$(date -d "${{ github.event.inputs.start_days_ago || '1' }} days ago" +%Y-%m-%d)
+          uv run synapse-pipeline export-telegram \
+            --start "$START_DATE" \
+            --end "$(date +%Y-%m-%d)" \
+            --output ./telegram_exports
+          
+          # Count exported messages for metadata
+          MESSAGE_COUNT=$(find ./telegram_exports -name "*.json" -exec wc -l {} + | tail -1 | awk '{print $1}' || echo "0")
+          echo "Exported $MESSAGE_COUNT messages from Telegram"
+      
+      - name: Upload Telegram Exports
+        uses: actions/upload-artifact@v4
+        with:
+          name: telegram-exports-${{ github.run_id }}
+          path: telegram_exports/
+          retention-days: 7
+          compression-level: 6
+      
+      - name: Set Export Status
+        id: export-status
+        run: |
+          MESSAGE_COUNT=$(find ./telegram_exports -name "*.json" -exec wc -l {} + | tail -1 | awk '{print $1}' || echo "0")
+          echo "status=success" >> $GITHUB_OUTPUT
+          echo "count=$MESSAGE_COUNT" >> $GITHUB_OUTPUT
+          echo "date-range=${{ github.event.inputs.start_days_ago || '1' }}" >> $GITHUB_OUTPUT
+
+  # Job 2: Export Google Drive Data (Parallel with Telegram)
+  export-gdrive:
+    name: Export Google Drive Data
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      gdrive-status: ${{ steps.export-status.outputs.status }}
+      file-count: ${{ steps.export-status.outputs.count }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -71,15 +136,6 @@ jobs:
           restore-keys: |
             rclone-${{ runner.os }}-
       
-      # Cache Claude CLI (weekly refresh)
-      - name: Cache Claude CLI
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: claude-cli-${{ runner.os }}-${{ steps.date.outputs.week }}
-          restore-keys: |
-            claude-cli-${{ runner.os }}-
-      
       - name: Install rclone
         run: |
           if [ ! -f /usr/bin/rclone ]; then
@@ -98,25 +154,64 @@ jobs:
           echo '${{ secrets.GDRIVE_SERVICE_ACCOUNT_B64 }}' | base64 -d > service-account.json
           chmod 600 service-account.json
       
-      # Export Telegram data
-      - name: Export Telegram Messages
-        env:
-          SYNAPSE_TELEGRAM__API_ID: ${{ secrets.TELEGRAM_API_ID }}
-          SYNAPSE_TELEGRAM__API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
-          SYNAPSE_TELEGRAM__SESSION_STRING: ${{ secrets.TELEGRAM_SESSION_STRING }}
-        run: |
-          START_DATE=$(date -d "${{ github.event.inputs.start_days_ago || '1' }} days ago" +%Y-%m-%d)
-          uv run synapse-pipeline export-telegram \
-            --start "$START_DATE" \
-            --end "$(date +%Y-%m-%d)" \
-            --output ./telegram_exports
-      
       # Download Google Drive data
       - name: Download Team Data from Google Drive
         run: |
           uv run synapse-pipeline download-gdrive \
             ./gdrive_data \
             --since-days ${{ github.event.inputs.start_days_ago || '1' }}
+          
+          # Count downloaded files for metadata
+          FILE_COUNT=$(find ./gdrive_data -type f | wc -l || echo "0")
+          echo "Downloaded $FILE_COUNT files from Google Drive"
+      
+      - name: Upload Google Drive Data
+        uses: actions/upload-artifact@v4
+        with:
+          name: gdrive-data-${{ github.run_id }}
+          path: gdrive_data/
+          retention-days: 7
+          compression-level: 6
+      
+      - name: Set Export Status
+        id: export-status
+        run: |
+          FILE_COUNT=$(find ./gdrive_data -type f | wc -l || echo "0")
+          echo "status=success" >> $GITHUB_OUTPUT
+          echo "count=$FILE_COUNT" >> $GITHUB_OUTPUT
+
+  # Job 3: Transform Data (Depends only on Telegram - Early Start!)
+  transform-data:
+    name: Transform Data to Markdown
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: export-telegram
+    if: needs.export-telegram.outputs.telegram-status == 'success'
+    outputs:
+      transform-status: ${{ steps.transform-status.outputs.status }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      # Install uv with built-in caching
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      
+      - name: Install Dependencies
+        run: uv sync
+      
+      - name: Download Telegram Exports
+        uses: actions/download-artifact@v4
+        with:
+          name: telegram-exports-${{ github.run_id }}
+          path: telegram_exports/
       
       # Transform Telegram data to markdown
       - name: Transform Telegram Data
@@ -124,6 +219,61 @@ jobs:
           uv run synapse-pipeline batch-transform \
             ./telegram_exports \
             --output ./transformed_data
+          
+          echo "Transformed $(find ./transformed_data -name "*.md" | wc -l) markdown files"
+      
+      - name: Upload Transformed Data
+        uses: actions/upload-artifact@v4
+        with:
+          name: transformed-data-${{ github.run_id }}
+          path: transformed_data/
+          retention-days: 7
+          compression-level: 6
+      
+      - name: Set Transform Status
+        id: transform-status
+        run: |
+          echo "status=success" >> $GITHUB_OUTPUT
+
+  # Job 4: Generate Digest (Depends on both Transform and GDrive)
+  generate-digest:
+    name: Generate Team Digest with Claude
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [transform-data, export-gdrive]
+    if: needs.transform-data.outputs.transform-status == 'success' && needs.export-gdrive.outputs.gdrive-status == 'success'
+    outputs:
+      digest-status: ${{ steps.digest-status.outputs.status }}
+      digest-filename: ${{ steps.digest-status.outputs.filename }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      # Get current week for weekly cache refresh
+      - name: Get current week
+        id: date
+        run: echo "week=$(date +'%Y-W%U')" >> $GITHUB_OUTPUT
+      
+      # Cache Claude CLI (weekly refresh)
+      - name: Cache Claude CLI
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: claude-cli-${{ runner.os }}-${{ steps.date.outputs.week }}
+          restore-keys: |
+            claude-cli-${{ runner.os }}-
+      
+      - name: Download Transformed Data
+        uses: actions/download-artifact@v4
+        with:
+          name: transformed-data-${{ github.run_id }}
+          path: transformed_data/
+      
+      - name: Download Google Drive Data
+        uses: actions/download-artifact@v4
+        with:
+          name: gdrive-data-${{ github.run_id }}
+          path: gdrive_data/
       
       # Install Claude CLI
       - name: Install Claude CLI
@@ -135,7 +285,7 @@ jobs:
             echo "Using cached Claude CLI"
           fi
           claude --version
-          
+      
       # Generate digest using Claude CLI
       - name: Generate Team Digest
         env:
@@ -166,29 +316,25 @@ jobs:
           fi
           
           echo "::notice::Team digest generated successfully: $DIGEST_FILE"
-      
-      - name: Prepare Outputs
-        run: |
-          mkdir -p outputs
-          DIGEST_DATE=$(date +%Y-%m-%d)
-          DIGEST_FILE="digest_${DIGEST_DATE}.md"
-          cp "digest_workspace/$DIGEST_FILE" "outputs/$DIGEST_FILE"
+          
+          # Prepare outputs
+          mkdir -p ../outputs
+          cp "$DIGEST_FILE" "../outputs/$DIGEST_FILE"
           
           # Create metadata file
-          cat > outputs/metadata.json <<EOF
+          cat > ../outputs/metadata.json <<EOF
           {
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "date_range": "${{ github.event.inputs.start_days_ago || '7' }} days",
+            "date_range": "${{ needs.export-telegram.outputs.date-range }} days",
             "workflow_run_id": "${{ github.run_id }}",
             "workflow_run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
             "commit_sha": "${{ github.sha }}",
             "triggered_by": "${{ github.event_name }}",
-            "telegram_channels_exported": "from config.toml",
-            "gdrive_data_downloaded": true
+            "telegram_messages": "${{ needs.export-telegram.outputs.message-count }}",
+            "gdrive_files": "${{ needs.export-gdrive.outputs.file-count }}"
           }
           EOF
       
-      # Upload artifacts to GitHub
       - name: Upload Digest Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -196,50 +342,162 @@ jobs:
           path: outputs/
           retention-days: 30
       
-      # Upload to Google Drive
-      - name: Upload to Google Drive
-        id: gdrive_upload
-        if: ${{ github.event.inputs.skip_upload != 'true' }}
+      - name: Set Digest Status
+        id: digest-status
         run: |
-          DIGEST_FILE="outputs/digest_$(date +%Y-%m-%d).md"
-          SHARE_LINK=$(uv run synapse-pipeline upload-digest "$DIGEST_FILE" | grep "Share link:" | cut -d' ' -f3)
-          echo "gdrive_url=$SHARE_LINK" >> $GITHUB_OUTPUT
+          echo "status=success" >> $GITHUB_OUTPUT
+          echo "filename=digest_$(date +%Y-%m-%d).md" >> $GITHUB_OUTPUT
+
+  # Job 5: Upload to Google Drive (Parallel Distribution)
+  upload-digest:
+    name: Upload to Google Drive
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: generate-digest
+    if: needs.generate-digest.outputs.digest-status == 'success' && github.event.inputs.skip_upload != 'true'
+    outputs:
+      gdrive-url: ${{ steps.upload.outputs.url }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
       
-      # Send Telegram notification
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      # Install uv with built-in caching
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      
+      # Get current week for weekly cache refresh
+      - name: Get current week
+        id: date
+        run: echo "week=$(date +'%Y-W%U')" >> $GITHUB_OUTPUT
+      
+      # Cache rclone (weekly refresh)
+      - name: Cache rclone
+        uses: actions/cache@v4
+        with:
+          path: /usr/bin/rclone
+          key: rclone-${{ runner.os }}-${{ steps.date.outputs.week }}
+          restore-keys: |
+            rclone-${{ runner.os }}-
+      
+      - name: Install rclone
+        run: |
+          if [ ! -f /usr/bin/rclone ]; then
+            echo "Installing rclone (cache miss)..."
+            curl https://rclone.org/install.sh | sudo bash
+          else
+            echo "Using cached rclone"
+          fi
+          rclone version
+      
+      - name: Install Dependencies
+        run: uv sync
+      
+      - name: Setup Google Drive Service Account
+        run: |
+          echo '${{ secrets.GDRIVE_SERVICE_ACCOUNT_B64 }}' | base64 -d > service-account.json
+          chmod 600 service-account.json
+      
+      - name: Download Digest
+        uses: actions/download-artifact@v4
+        with:
+          name: team-digest-${{ github.run_id }}
+          path: outputs/
+      
+      - name: Upload to Google Drive
+        id: upload
+        run: |
+          DIGEST_FILE="outputs/${{ needs.generate-digest.outputs.digest-filename }}"
+          SHARE_LINK=$(uv run synapse-pipeline upload-digest "$DIGEST_FILE" | grep "Share link:" | cut -d' ' -f3)
+          echo "url=$SHARE_LINK" >> $GITHUB_OUTPUT
+          echo "::notice::Uploaded to Google Drive: $SHARE_LINK"
+
+  # Job 6: Send Telegram Notification (Parallel Distribution)
+  notify-team:
+    name: Send Telegram Notification
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    needs: generate-digest
+    if: needs.generate-digest.outputs.digest-status == 'success' && github.event.inputs.skip_notify != 'true'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      # Install uv with built-in caching
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      
+      - name: Install Dependencies
+        run: uv sync
+      
+      - name: Download Digest
+        uses: actions/download-artifact@v4
+        with:
+          name: team-digest-${{ github.run_id }}
+          path: outputs/
+      
       - name: Send Telegram Notification
-        if: ${{ github.event.inputs.skip_notify != 'true' && github.event.inputs.skip_upload != 'true' }}
         env:
           SYNAPSE_TELEGRAM_NOTIFIER__BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
-          DIGEST_FILE="outputs/digest_$(date +%Y-%m-%d).md"
+          DIGEST_FILE="outputs/${{ needs.generate-digest.outputs.digest-filename }}"
           
           # Read the full digest content
           DIGEST_CONTENT=$(cat "$DIGEST_FILE")
           
           # Send the full digest with markdown formatting
           uv run synapse-pipeline notify "$DIGEST_CONTENT"
-      
-      - name: Workflow Summary
-        run: |
-          echo "## Team Digest Generation Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
-          echo "- **Generated at**: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Date range**: Last ${{ github.event.inputs.start_days_ago || '1' }} days" >> $GITHUB_STEP_SUMMARY
-          echo "- **Mode**: Full Pipeline (Telegram + Google Drive)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Pipeline Steps Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Telegram data exported" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Google Drive data downloaded" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Data transformed to markdown" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Digest generated with Claude" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ github.event.inputs.skip_upload }}" != "true" ]]; then
-            echo "- ✅ Uploaded to Google Drive: ${{ steps.gdrive_upload.outputs.gdrive_url }}" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [[ "${{ github.event.inputs.skip_notify }}" != "true" ]] && [[ "${{ github.event.inputs.skip_upload }}" != "true" ]]; then
-            echo "- ✅ Telegram notification sent" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "The generated digest is available as an artifact in this workflow run." >> $GITHUB_STEP_SUMMARY
+          echo "::notice::Telegram notification sent successfully"
 
+  # Summary Job (Always runs to show results)
+  workflow-summary:
+    name: Workflow Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    if: always()
+    needs: [export-telegram, export-gdrive, transform-data, generate-digest, upload-digest, notify-team]
+    steps:
+      - name: Generate Workflow Summary
+        run: |
+          echo "## 🚀 Team Digest Generation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Job Status Overview" >> $GITHUB_STEP_SUMMARY
+          echo "- **Telegram Export**: ${{ needs.export-telegram.result == 'success' && '✅' || '❌' }} ${{ needs.export-telegram.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Google Drive Export**: ${{ needs.export-gdrive.result == 'success' && '✅' || '❌' }} ${{ needs.export-gdrive.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Data Transform**: ${{ needs.transform-data.result == 'success' && '✅' || '❌' }} ${{ needs.transform-data.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Digest Generation**: ${{ needs.generate-digest.result == 'success' && '✅' || '❌' }} ${{ needs.generate-digest.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Google Drive Upload**: ${{ needs.upload-digest.result == 'success' && '✅' || needs.upload-digest.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.upload-digest.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Telegram Notification**: ${{ needs.notify-team.result == 'success' && '✅' || needs.notify-team.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.notify-team.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📈 Data Processing Stats" >> $GITHUB_STEP_SUMMARY
+          echo "- **Telegram Messages**: ${{ needs.export-telegram.outputs.message-count || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Google Drive Files**: ${{ needs.export-gdrive.outputs.file-count || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Date Range**: Last ${{ needs.export-telegram.outputs.date-range || '1' }} days" >> $GITHUB_STEP_SUMMARY
+          echo "- **Generated at**: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Results" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ needs.upload-digest.outputs.gdrive-url }}" != "" ]]; then
+            echo "- **Google Drive**: [${{ needs.upload-digest.outputs.gdrive-url }}](${{ needs.upload-digest.outputs.gdrive-url }})" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [[ "${{ github.event.inputs.skip_upload }}" == "true" ]]; then
+            echo "- **Google Drive**: ⏭️ Skipped (testing mode)" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [[ "${{ github.event.inputs.skip_notify }}" == "true" ]]; then
+            echo "- **Telegram**: ⏭️ Skipped (testing mode)" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 💾 Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "The generated digest is available as an artifact in this workflow run for 30 days." >> $GITHUB_STEP_SUMMARY
