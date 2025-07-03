@@ -197,9 +197,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       
-      - name: Setup Claude CLI
-        uses: ./.github/actions/setup-claude-cli
-      
       - name: Download Transformed Data
         uses: actions/download-artifact@v4
         with:
@@ -212,44 +209,49 @@ jobs:
           name: gdrive-data-${{ github.run_id }}
           path: gdrive_data/
       
-      
-      # Generate digest using Claude CLI
-      - name: Generate Team Digest
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+      - name: Prepare prompt
         run: |
-          # Create a clean workspace for digest generation
-          mkdir -p digest_workspace
-          cp -r ./transformed_data/* digest_workspace/
-          cp -r ./gdrive_data/* digest_workspace/ 2>/dev/null || true
-          cd digest_workspace
-          
-          # Debug: Show what files Claude will process
-          echo "Files in digest workspace:"
-          ls -la
-          
-          # Generate filename with today's date
           DIGEST_DATE=$(date +%Y-%m-%d)
           DIGEST_FILE="digest_${DIGEST_DATE}.md"
+          echo "DIGEST_FILE=$DIGEST_FILE" >> $GITHUB_ENV
           
-          # Run Claude with the agent prompt to write the digest
-          claude --model sonnet -p "Execute the provided instructions and write the complete digest to a file named '$DIGEST_FILE'" \
-            --allowedTools "LS" "Read" "Write" < ../demo_agentic_newsletter/newsletter_agent_prompt.md
+          # Debug: Show what files Claude will process
+          echo "Files available for Claude:"
+          ls -la transformed_data/ gdrive_data/ 2>/dev/null || true
           
+          # Create combined prompt
+          cat > combined_prompt.txt <<EOF
+          Execute the provided instructions and write the complete digest to a file named '$DIGEST_FILE'
+          
+          $(cat demo_agentic_newsletter/newsletter_agent_prompt.md)
+          EOF
+          
+          echo "::notice::Prompt prepared for digest generation"
+      
+      # Generate digest using official Claude Code action
+      - name: Generate Team Digest
+        uses: anthropics/claude-code-base-action@beta
+        with:
+          prompt_file: "combined_prompt.txt"
+          allowed_tools: "LS,Read,Write"
+          anthropic_api_key: ${{ secrets.CLAUDE_API_KEY }}
+      
+      - name: Prepare outputs
+        run: |
           # Verify output was created
-          if [ ! -f "$DIGEST_FILE" ] || [ ! -s "$DIGEST_FILE" ]; then
+          if [ ! -f "${{ env.DIGEST_FILE }}" ] || [ ! -s "${{ env.DIGEST_FILE }}" ]; then
             echo "::error::Newsletter generation failed - no output file created or file is empty"
             exit 1
           fi
           
-          echo "::notice::Team digest generated successfully: $DIGEST_FILE"
+          echo "::notice::Team digest generated successfully: ${{ env.DIGEST_FILE }}"
           
           # Prepare outputs
-          mkdir -p ../outputs
-          cp "$DIGEST_FILE" "../outputs/$DIGEST_FILE"
+          mkdir -p outputs
+          cp "${{ env.DIGEST_FILE }}" "outputs/${{ env.DIGEST_FILE }}"
           
           # Create metadata file
-          cat > ../outputs/metadata.json <<EOF
+          cat > outputs/metadata.json <<EOF
           {
             "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "date_range": "${{ needs.export-telegram.outputs.date-range }} days",
