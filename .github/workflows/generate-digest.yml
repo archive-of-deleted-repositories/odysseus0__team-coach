@@ -71,14 +71,12 @@ jobs:
           restore-keys: |
             rclone-${{ runner.os }}-
       
-      # Cache Claude CLI (weekly refresh)
-      - name: Cache Claude CLI
-        uses: actions/cache@v4
+      # Setup Node.js with built-in npm caching
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          path: ~/.npm
-          key: claude-cli-${{ runner.os }}-${{ steps.date.outputs.week }}
-          restore-keys: |
-            claude-cli-${{ runner.os }}-
+          node-version: '20'
+          cache: 'npm'
       
       - name: Install rclone
         run: |
@@ -129,7 +127,7 @@ jobs:
       - name: Install Claude CLI
         run: |
           if ! command -v claude &> /dev/null; then
-            echo "Installing Claude CLI (cache miss)..."
+            echo "Installing Claude CLI..."
             npm install -g @anthropic-ai/claude-code
           else
             echo "Using cached Claude CLI"
