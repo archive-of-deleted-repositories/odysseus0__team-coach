@@ -350,6 +350,23 @@ jobs:
         run: |
           DIGEST_FILE="outputs/${{ needs.generate-digest.outputs.digest-filename }}"
           
+          # Debug: Show configuration being used
+          echo "🔍 Debug: Checking configuration..."
+          uv run synapse-pipeline doctor show-config
+          
+          # Debug: Test if config.toml exists and is readable
+          echo "🔍 Debug: Checking config.toml..."
+          ls -la config.toml
+          cat config.toml | grep -A 10 "\[telegram_notifier"
+          
+          # Debug: Test notification with explicit parameters
+          echo "🔍 Debug: Testing with explicit parameters..."
+          BOT_TOKEN_SUFFIX="${SYNAPSE_TELEGRAM_NOTIFIER__BOT_TOKEN: -10}"
+          echo "Bot token ends with: $BOT_TOKEN_SUFFIX"
+          
+          # Try explicit parameter test first
+          uv run synapse-pipeline notify "Debug test with explicit params" --token "$SYNAPSE_TELEGRAM_NOTIFIER__BOT_TOKEN" --chat "-1002682777986"
+          
           # Read the full digest content
           DIGEST_CONTENT=$(cat "$DIGEST_FILE")
           
