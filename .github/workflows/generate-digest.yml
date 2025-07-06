@@ -28,6 +28,14 @@ on:
         options:
           - 'true'
           - 'false'
+      skip_digest:
+        description: 'Skip Claude digest generation (for testing data pipeline)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 # Restrict permissions
 permissions:
@@ -190,7 +198,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [transform-data, export-gdrive]
-    if: needs.transform-data.outputs.transform-status == 'success' && needs.export-gdrive.outputs.gdrive-status == 'success'
+    if: needs.transform-data.outputs.transform-status == 'success' && needs.export-gdrive.outputs.gdrive-status == 'success' && github.event.inputs.skip_digest != 'true'
     outputs:
       digest-status: ${{ steps.digest-status.outputs.status }}
       digest-filename: ${{ steps.digest-status.outputs.filename }}
@@ -290,7 +298,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: generate-digest
-    if: needs.generate-digest.outputs.digest-status == 'success' && github.event.inputs.skip_upload != 'true'
+    if: needs.generate-digest.result == 'success' && github.event.inputs.skip_upload != 'true'
     outputs:
       gdrive-url: ${{ steps.upload.outputs.url }}
     steps:
@@ -330,7 +338,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     needs: generate-digest
-    if: needs.generate-digest.outputs.digest-status == 'success' && github.event.inputs.skip_notify != 'true'
+    if: needs.generate-digest.result == 'success' && github.event.inputs.skip_notify != 'true'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
