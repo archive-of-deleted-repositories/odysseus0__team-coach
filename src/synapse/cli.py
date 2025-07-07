@@ -249,12 +249,11 @@ def notify(
     if thread_id is None and settings.telegram_notifier.target.topic_id is not None:
         thread_id = str(settings.telegram_notifier.target.topic_id)
     
-    success = send_telegram_notification(message, bot_token, chat_id, thread_id)
-    
-    if success:
+    try:
+        send_telegram_notification(message, bot_token, chat_id, thread_id)
         typer.echo('✅ Notification sent successfully!')
-    else:
-        typer.echo('❌ Failed to send notification. Check your bot token and chat ID.', err=True)
+    except Exception as e:
+        typer.echo(f'❌ {e}', err=True)
         raise typer.Exit(1)
 
 
@@ -570,14 +569,15 @@ def test_telegram_integration():
     
     # Test 1: Simple message
     typer.echo('Test 1: Sending simple message...')
-    result = send_telegram_notification(
-        'Hello from Synapse Pipeline! 👋',
-        bot_token=bot_token,
-        chat_id=chat_id
-    )
-    typer.echo(f'Result: {"✅ Success" if result else "❌ Failed"}\n')
-    
-    if not result:
+    try:
+        send_telegram_notification(
+            'Hello from Synapse Pipeline! 👋',
+            bot_token=bot_token,
+            chat_id=chat_id
+        )
+        typer.echo('Result: ✅ Success\n')
+    except Exception as e:
+        typer.echo(f'Result: ❌ {e}\n')
         raise typer.Exit(1)
     
     # Test 2: Markdown message
@@ -591,23 +591,29 @@ This is a test of the notification system:
 
 Status: `OPERATIONAL`"""
     
-    result = send_telegram_notification(
-        markdown_msg,
-        bot_token=bot_token,
-        chat_id=chat_id
-    )
-    typer.echo(f'Result: {"✅ Success" if result else "❌ Failed"}\n')
+    try:
+        send_telegram_notification(
+            markdown_msg,
+            bot_token=bot_token,
+            chat_id=chat_id
+        )
+        typer.echo('Result: ✅ Success\n')
+    except Exception as e:
+        typer.echo(f'Result: ❌ {e}\n')
     
     # Test 3: With topic ID if configured
     if settings.telegram_notifier.target.topic_id:
         typer.echo(f'Test 3: Sending to topic {settings.telegram_notifier.target.topic_id}...')
-        result = send_telegram_notification(
-            'Testing topic/thread notification 🎯',
-            bot_token=bot_token,
-            chat_id=chat_id,
-            thread_id=str(settings.telegram_notifier.target.topic_id)
-        )
-        typer.echo(f'Result: {"✅ Success" if result else "❌ Failed"}\n')
+        try:
+            send_telegram_notification(
+                'Testing topic/thread notification 🎯',
+                bot_token=bot_token,
+                chat_id=chat_id,
+                thread_id=str(settings.telegram_notifier.target.topic_id)
+            )
+            typer.echo('Result: ✅ Success\n')
+        except Exception as e:
+            typer.echo(f'Result: ❌ {e}\n')
     
     typer.echo('🎉 Integration test complete!')
 
