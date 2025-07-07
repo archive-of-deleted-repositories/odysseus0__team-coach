@@ -1,34 +1,21 @@
 Generate a daily team digest from the meeting transcripts and chat logs in the current directory.
 
-Analyze all available data files and create a comprehensive summary that helps the team stay aligned and informed.
+Create a high-signal summary that helps a distributed team stay connected. Focus on information density - pack the most valuable context into the fewest words. Include what different people are working on, emerging ideas, and progress that helps everyone understand the bigger picture.
 
-The digest should have these sections:
+Write for busy people who need to quickly understand what's happening across the organization. Every sentence should earn its place.
+
+Start with:
 
 ## 📅 Daily Digest - [Today's Date]
 
-### 🎯 Key Updates
-- Major decisions, announcements, or completions found in the data
-- Progress on critical projects or initiatives
-- Important deadlines or milestones reached
+Then include only the sections that have meaningful content from these options:
 
-### 💬 Discussion Highlights
-- Notable conversations or debates from Telegram/meetings
-- Questions raised that need team input
-- Emerging ideas or proposals
+- **🎯 Key Updates** - The most important developments (if any major things happened)
+- **💡 Work in Progress** - What people/teams are actively working on (if there are clear work streams)
+- **🔍 Notable Discussions** - Interesting conversations or ideas (if there were substantive discussions)
+- **⚡ Action Items & Blockers** - Items needing attention (only if there are clear asks)
+- **👀 Looking Ahead** - Upcoming events or decisions (if any were mentioned)
 
-### 🚀 Action Items
-- Tasks assigned or commitments made
-- Blockers that need immediate attention
-- Decisions pending team input
+Don't force sections - if nothing fits naturally, skip it. The goal is a high-signal digest that reflects what actually happened, not filling out a template.
 
-### 📊 Quick Metrics (if applicable)
-- Key numbers or data points mentioned
-- Status updates on tracked goals
-- Resource allocation changes
-
-### 🔔 Next Steps
-- Upcoming meetings or deadlines mentioned
-- Open items requiring follow-up
-- Anticipated challenges or opportunities
-
-Keep the digest concise and scannable. Use bullet points liberally. Focus on what matters for team coordination and decision-making.
+Remember: Write tight. Every bullet point should be worth the reader's time. Aim for a digest someone can absorb in under 2 minutes.
