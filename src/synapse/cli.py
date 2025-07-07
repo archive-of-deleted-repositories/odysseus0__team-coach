@@ -1,6 +1,7 @@
 """Command-line interface for Synapse Pipeline."""
 
 import asyncio
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -222,12 +223,22 @@ def upload_digest(
 
 @app.command()
 def notify(
-    message: str = typer.Argument(..., help='Message to send'),
+    message: str | None = typer.Argument(None, help='Message to send (reads from stdin if not provided)'),
     bot_token: str | None = typer.Option(None, '--token', '-t', help='Telegram bot token'),
     chat_id: str | None = typer.Option(None, '--chat', '-c', help='Telegram chat ID'),
     thread_id: str | None = typer.Option(None, '--thread', help='Telegram thread ID (for forum topics)'),
 ):
     """Send a notification via Telegram bot."""
+    # Read from stdin if no message provided
+    if message is None:
+        if sys.stdin.isatty():
+            typer.echo('❌ Error: No message provided. Use an argument or pipe input to stdin.', err=True)
+            raise typer.Exit(1)
+        message = sys.stdin.read().strip()
+        if not message:
+            typer.echo('❌ Error: Empty message from stdin.', err=True)
+            raise typer.Exit(1)
+    
     settings = get_settings()
     
     # Use settings defaults if not provided

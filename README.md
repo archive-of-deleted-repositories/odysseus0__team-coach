@@ -199,6 +199,22 @@ synapse-pipeline upload-digest ./output/team-digest.md
 synapse-pipeline upload-digest ./output/team-digest.md --filename "weekly-digest-2024-01-08.md"
 ```
 
+### Send notifications via Telegram
+
+```bash
+# Send a message directly
+synapse-pipeline notify "Team digest is ready!"
+
+# Pipe message from another command
+echo "Digest uploaded successfully" | synapse-pipeline notify
+
+# Use custom bot credentials (overrides config)
+synapse-pipeline notify "Hello team" --token BOT_TOKEN --chat CHAT_ID
+
+# Send to a specific topic/thread
+synapse-pipeline notify "New digest available" --thread THREAD_ID
+```
+
 ## GitHub Actions Setup
 
 The repository includes a GitHub Actions workflow for automated weekly digest generation.

@@ -39,6 +39,10 @@ synapse-pipeline batch-transform input_dir/ -o output_dir/
 # CLI usage - Google Drive integration
 synapse-pipeline download-gdrive ./downloaded-data --since-days 7
 synapse-pipeline upload-digest ./output/digest.md --filename "weekly-digest.md"
+
+# CLI usage - Notifications
+synapse-pipeline notify "Team digest ready!"  # Send notification
+echo "Digest uploaded" | synapse-pipeline notify  # Read from stdin
 ```
 
 ## Architecture
