@@ -40,15 +40,16 @@ The pipeline can be deployed immediately. See README.md for setup instructions.
 
 ## Roadmap
 
-### Phase 1: Observability (Next)
-- Add detailed logging of processed files
-- Show which sources contributed to digest
-- Enable debugging of pipeline issues
+### ✅ Phase 1: Observability (Complete)
+- Added detailed logging of processed files
+- Show specific Telegram channels with message counts
+- Show Google Drive files downloaded with sizes
+- Enhanced workflow summary for debugging
 
-### Phase 2: Source Citation
-- Include references in generated digests
-- Link back to original Telegram messages or documents
-- Improve accountability and context
+### ✅ Phase 2: Source Citation (Complete)
+- Updated prompt to include inline source references
+- Added citation format for channels and documents
+- Improved accountability through attribution
 
 ### Phase 3: State Management
 - Implement memory between runs
