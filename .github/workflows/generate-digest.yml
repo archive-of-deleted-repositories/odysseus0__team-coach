@@ -52,6 +52,7 @@ jobs:
       telegram-status: ${{ steps.export-status.outputs.status }}
       message-count: ${{ steps.export-status.outputs.count }}
       date-range: ${{ steps.export-status.outputs.date-range }}
+      channels-detail: ${{ steps.export-status.outputs.channels-detail }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -93,6 +94,19 @@ jobs:
           echo "status=success" >> $GITHUB_OUTPUT
           echo "count=$MESSAGE_COUNT" >> $GITHUB_OUTPUT
           echo "date-range=${{ github.event.inputs.start_days_ago || '1' }}" >> $GITHUB_OUTPUT
+          
+          # Build channel details string for output
+          CHANNELS_DETAIL=""
+          for file in ./telegram_exports/*.json; do
+            if [ -f "$file" ]; then
+              CHANNEL=$(basename "$file" .json)
+              MSG_COUNT=$(wc -l < "$file")
+              CHANNELS_DETAIL="${CHANNELS_DETAIL}- ${CHANNEL}: ${MSG_COUNT} messages\n"
+            fi
+          done
+          echo "channels-detail<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$CHANNELS_DETAIL" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
   # Job 2: Export Google Drive Data (Parallel with Telegram)
   export-gdrive:
@@ -102,6 +116,7 @@ jobs:
     outputs:
       gdrive-status: ${{ steps.export-status.outputs.status }}
       file-count: ${{ steps.export-status.outputs.count }}
+      files-detail: ${{ steps.export-status.outputs.files-detail }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -147,6 +162,19 @@ jobs:
           FILE_COUNT=$(find ./gdrive_data -type f | wc -l || echo "0")
           echo "status=success" >> $GITHUB_OUTPUT
           echo "count=$FILE_COUNT" >> $GITHUB_OUTPUT
+          
+          # Build file details string for output
+          FILES_DETAIL=""
+          for file in $(find ./gdrive_data -type f); do
+            if [ -f "$file" ]; then
+              FILENAME=$(basename "$file")
+              FILESIZE=$(du -h "$file" | cut -f1)
+              FILES_DETAIL="${FILES_DETAIL}- ${FILENAME} (${FILESIZE})\n"
+            fi
+          done
+          echo "files-detail<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$FILES_DETAIL" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
   # Job 3: Transform Data (Depends only on Telegram - Early Start!)
   transform-data:
@@ -390,6 +418,21 @@ jobs:
           echo "- **Google Drive Files**: ${{ needs.export-gdrive.outputs.file-count || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Date Range**: Last ${{ needs.export-telegram.outputs.date-range || '1' }} days" >> $GITHUB_STEP_SUMMARY
           echo "- **Generated at**: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Add Telegram channel details if available
+          if [[ -n "${{ needs.export-telegram.outputs.channels-detail }}" ]]; then
+            echo "### 📱 Telegram Channels Processed" >> $GITHUB_STEP_SUMMARY
+            echo "${{ needs.export-telegram.outputs.channels-detail }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Add Google Drive file details if available  
+          if [[ -n "${{ needs.export-gdrive.outputs.files-detail }}" ]]; then
+            echo "### 📂 Google Drive Files Downloaded" >> $GITHUB_STEP_SUMMARY
+            echo "${{ needs.export-gdrive.outputs.files-detail }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔗 Results" >> $GITHUB_STEP_SUMMARY
           if [[ "${{ needs.upload-digest.outputs.gdrive-url }}" != "" ]]; then
