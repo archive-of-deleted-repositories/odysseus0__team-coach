@@ -52,6 +52,14 @@ map_outputs/
 downloaded-data/
 test-digest.md
 
+# Generated outputs
+*_output.md
+test_digest_*.md
+**/digest_*.md
+**/metadata.json
+**/test_workspace/
+digest_workspace/
+
 # OS
 .DS_Store
 Thumbs.db
