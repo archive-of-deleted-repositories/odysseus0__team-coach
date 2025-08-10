@@ -26,6 +26,7 @@ class GoogleDriveUploader:
         self.service_account_path = service_account_path or settings.gdrive.service_account_path
         self.team_data_folder_id = settings.gdrive.team_data_folder_id
         self.team_digests_folder_id = settings.gdrive.team_digests_folder_id
+        self.agent_memory_folder_id = settings.gdrive.agent_memory_folder_id
         
         if not self.service_account_path:
             raise ValueError('Service account path is required for Google Drive authentication')
@@ -187,3 +188,73 @@ service_account_file = {self.service_account_path}
         
         # Fallback to folder link
         return f'https://drive.google.com/drive/folders/{self.team_digests_folder_id}'
+    
+    def download_memory_folder(self, output_dir: Path) -> Path:
+        """Download the agent's memory folder from Google Drive.
+        
+        Args:
+            output_dir: Local directory to save the memory folder.
+            
+        Returns:
+            Path to the downloaded memory folder.
+        """
+        if not self.agent_memory_folder_id:
+            logger.info('No agent_memory_folder_id configured - skipping memory download')
+            output_dir.mkdir(parents=True, exist_ok=True)
+            return output_dir
+        
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Download entire memory folder recursively
+        download_args = [
+            'sync',
+            f'gdrive:',
+            str(output_dir),
+            '--drive-root-folder-id', self.agent_memory_folder_id,
+            '--create-empty-src-dirs'
+        ]
+        
+        result = self._run_rclone(download_args)
+        if not result['success']:
+            logger.warning(f"Failed to download memory folder: {result['error']}")
+            # Continue anyway - agent can start with empty memory
+        else:
+            file_count = sum(1 for _ in output_dir.rglob('*') if _.is_file())
+            logger.info(f'Downloaded agent memory: {file_count} files')
+        
+        return output_dir
+    
+    def upload_memory_folder(self, memory_dir: Path) -> bool:
+        """Upload the agent's memory folder back to Google Drive.
+        
+        Args:
+            memory_dir: Local directory containing the agent's memory.
+            
+        Returns:
+            True if upload successful, False otherwise.
+        """
+        if not self.agent_memory_folder_id:
+            logger.info('No agent_memory_folder_id configured - skipping memory upload')
+            return True
+        
+        if not memory_dir.exists():
+            logger.warning(f'Memory directory does not exist: {memory_dir}')
+            return False
+        
+        # Sync local memory folder to Google Drive
+        upload_args = [
+            'sync',
+            str(memory_dir),
+            f'gdrive:',
+            '--drive-root-folder-id', self.agent_memory_folder_id,
+            '--create-empty-src-dirs'
+        ]
+        
+        result = self._run_rclone(upload_args)
+        if not result['success']:
+            logger.error(f"Failed to upload memory folder: {result['error']}")
+            return False
+        
+        file_count = sum(1 for _ in memory_dir.rglob('*') if _.is_file())
+        logger.info(f'Successfully uploaded agent memory: {file_count} files')
+        return True

@@ -32,6 +32,7 @@ topic_id = 2457       # Update channel topic
 service_account_path = "./service-account.json"              # Path to service account JSON file
 team_data_folder_id = "11oFJlobneHfKILYpjIB9J_uHtYr-8TZT"    # Context data folder
 team_digests_folder_id = "19v2W2C0DlSgh-9HneDSJTP42fbunqzTQ" # Team digests output folder
+agent_memory_folder_id = "1oAFvAeuj78r--SAB5hb1Y21DHL-Lsx4V" # Agent's memory folder
 
 # To get folder IDs:
 # 1. Open the folder in Google Drive

@@ -38,6 +38,7 @@ class GDriveConfig(BaseModel):
     service_account_path: str | None = Field(default=None, description='Path to Google service account JSON file')
     team_data_folder_id: str | None = Field(default=None, description='Google Drive folder ID for team data inputs')
     team_digests_folder_id: str | None = Field(default=None, description='Google Drive folder ID for team digest outputs')
+    agent_memory_folder_id: str | None = Field(default=None, description='Google Drive folder ID for agent memory')
     rclone_config_path: Path | None = Field(default=None, description='Optional path to rclone config file')
 
 

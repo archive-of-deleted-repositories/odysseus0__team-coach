@@ -234,6 +234,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       
+      - name: Setup uv Environment
+        uses: ./.github/actions/setup-uv-env
+      
+      - name: Install rclone
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+          rclone version
+      
+      - name: Setup Google Drive Service Account
+        run: |
+          echo '${{ secrets.GDRIVE_SERVICE_ACCOUNT_B64 }}' | base64 -d > service-account.json
+          chmod 600 service-account.json
+      
+      - name: Download Agent Memory
+        run: |
+          echo "::notice::Downloading agent memory from Google Drive"
+          uv run synapse-pipeline download-memory ./agent_memory
+      
       - name: Download Transformed Data
         uses: actions/download-artifact@v4
         with:
@@ -260,11 +278,16 @@ jobs:
           
           # Debug: Show what files Claude will process
           echo "Files available for Claude:"
-          ls -la transformed_data/ gdrive_data/ 2>/dev/null || true
+          ls -la transformed_data/ gdrive_data/ agent_memory/ 2>/dev/null || true
           
-          # Create combined prompt
+          # Create combined prompt with only runtime-specific information
           cat > combined_prompt.txt <<EOF
-          Execute the provided instructions and write the complete digest to a file named '$DIGEST_FILE'
+          Write the digest to a file named: $DIGEST_FILE
+          
+          Available data folders:
+          - transformed_data/ - Today's Telegram messages
+          - gdrive_data/ - Recent Google Drive documents
+          - agent_memory/ - Your persistent memory (read/write)
           
           $(cat demo_agentic_newsletter/newsletter_agent_prompt.md)
           EOF
@@ -278,6 +301,11 @@ jobs:
           prompt_file: "combined_prompt.txt"
           allowed_tools: "LS,Read,Write"
           anthropic_api_key: ${{ secrets.CLAUDE_API_KEY }}
+      
+      - name: Upload Agent Memory
+        run: |
+          echo "::notice::Uploading updated agent memory to Google Drive"
+          uv run synapse-pipeline upload-memory ./agent_memory
       
       - name: Prepare outputs
         run: |

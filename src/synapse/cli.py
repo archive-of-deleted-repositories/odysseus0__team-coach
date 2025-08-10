@@ -222,6 +222,59 @@ def upload_digest(
 
 
 @app.command()
+def download_memory(
+    output_dir: Path = typer.Argument(Path('./agent_memory'), help='Directory to save agent memory'),
+):
+    """Download agent memory folder from Google Drive."""
+    try:
+        # Initialize uploader
+        uploader = GoogleDriveUploader()
+        
+        typer.echo(f'📥 Downloading agent memory to {output_dir}...')
+        
+        # Download memory folder
+        memory_path = uploader.download_memory_folder(output_dir)
+        
+        # Count files downloaded
+        file_count = sum(1 for _ in memory_path.rglob('*') if _.is_file())
+        
+        if file_count > 0:
+            typer.echo(f'✅ Downloaded {file_count} files to {memory_path}')
+        else:
+            typer.echo('📝 Starting with empty memory (no existing memory found)')
+            
+    except Exception as e:
+        typer.echo(f'❌ Error: {e}', err=True)
+        raise typer.Exit(1)
+
+
+@app.command()
+def upload_memory(
+    memory_dir: Path = typer.Argument(Path('./agent_memory'), help='Directory containing agent memory'),
+):
+    """Upload agent memory folder to Google Drive."""
+    try:
+        # Initialize uploader
+        uploader = GoogleDriveUploader()
+        
+        typer.echo(f'📤 Uploading agent memory from {memory_dir}...')
+        
+        # Upload memory folder
+        success = uploader.upload_memory_folder(memory_dir)
+        
+        if success:
+            file_count = sum(1 for _ in memory_dir.rglob('*') if _.is_file())
+            typer.echo(f'✅ Successfully uploaded {file_count} files')
+        else:
+            typer.echo('❌ Failed to upload memory to Google Drive', err=True)
+            raise typer.Exit(1)
+            
+    except Exception as e:
+        typer.echo(f'❌ Error: {e}', err=True)
+        raise typer.Exit(1)
+
+
+@app.command()
 def notify(
     message: str | None = typer.Argument(None, help='Message to send (reads from stdin if not provided)'),
     bot_token: str | None = typer.Option(None, '--token', '-t', help='Telegram bot token'),
