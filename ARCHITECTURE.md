@@ -41,13 +41,15 @@ graph TD
     E --> E2[Send Telegram Notification]
 ```
 
-## Implementation Approaches
+## Implementation
 
-### MVP Script (`synapse_mvp.py`)
-A single-file implementation that orchestrates the entire pipeline end-to-end. Suitable for quick deployment and testing.
+The system uses a modular CLI architecture (`src/synapse/`) with clear separation of concerns:
+- **Exporters** - Data collection from external sources
+- **Transformers** - Data parsing and formatting
+- **Uploaders** - Distribution to Google Drive
+- **Notifiers** - Telegram notifications
 
-### Modular CLI (`src/synapse/`)
-Production-ready implementation with clear separation of concerns. Each component is independently testable and reusable.
+Each component is independently testable and reusable. The CLI commands are orchestrated by GitHub Actions for automated daily runs.
 
 ## Key Design Decisions
 
