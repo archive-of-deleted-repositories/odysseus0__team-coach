@@ -88,7 +88,7 @@ The Google Drive integration uses the rclone CLI directly via subprocess calls:
 - Uploads digests and returns shareable links
 - No Python wrapper dependencies - just direct CLI calls for reliability
 
-See `CONTEXT.md` for detailed sprint goals and priorities.
+See `PROJECT.md` for detailed project context and roadmap.
 
 ## Testing
 
