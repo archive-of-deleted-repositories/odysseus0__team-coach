@@ -76,7 +76,7 @@ Telegram Export → parse_telegram_export() → TelegramMessage objects
 The project is in an MVP sprint focusing on:
 1. ✅ Telegram API integration (programmatic export) - COMPLETED
 2. ✅ Google Drive integration (bidirectional sync) - COMPLETED
-3. ✅ Claude API integration for content generation - COMPLETED (via demo script)
+3. ✅ Claude API integration for content generation - COMPLETED (via digest generation scripts)
 4. ✅ GitHub Actions automation - COMPLETED
 
 ### Google Drive Integration Details
@@ -103,5 +103,5 @@ Tests use real data samples in `tests/data/`. The test suite comprehensively cov
 
 - This project was migrated from a complex MapReduce newsletter generator
 - Focus is now solely on the data pipeline for team context syncing
-- The `demo_agentic_newsletter/` folder contains a working example of Claude-based content generation
+- The `config/team_coach_prompt.md` contains the Team Coach prompt for digest generation using Claude
 - Python 3.12+ is strictly required

@@ -289,7 +289,7 @@ jobs:
           - gdrive_data/ - Recent Google Drive documents
           - agent_memory/ - Your persistent memory (read/write)
           
-          $(cat demo_agentic_newsletter/newsletter_agent_prompt.md)
+          $(cat config/team_coach_prompt.md)
           EOF
           
           echo "::notice::Prompt prepared for digest generation"
