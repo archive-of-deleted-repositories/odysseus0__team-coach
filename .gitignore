@@ -44,6 +44,7 @@ env/
 service-account.json
 *-service-account.json
 credentials/
+Agent Memory/
 
 # Data directories
 data/
