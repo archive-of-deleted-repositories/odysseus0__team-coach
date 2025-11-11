@@ -220,12 +220,54 @@ jobs:
         run: |
           echo "status=success" >> $GITHUB_OUTPUT
 
-  # Job 4: Generate Digest (Depends on both Transform and GDrive)
+  # Job 4: Extract Feedback (Fast text processing)
+  extract-feedback:
+    name: Extract Bot Feedback
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    needs: transform-data
+    if: needs.transform-data.outputs.transform-status == 'success'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv Environment
+        uses: ./.github/actions/setup-uv-env
+
+      - name: Download Transformed Data
+        uses: actions/download-artifact@v4
+        with:
+          name: transformed-data-${{ github.run_id }}
+          path: transformed_data/
+
+      - name: Extract Feedback Mentions
+        run: |
+          uv run synapse-pipeline extract-feedback \
+            ./transformed_data \
+            --output feedback_section.txt \
+            --bot-pattern "@synapse_x_bot"
+
+          # Show what was found (for debugging)
+          if [ -s feedback_section.txt ]; then
+            echo "::notice::Feedback mentions detected"
+            head -n 20 feedback_section.txt
+          else
+            echo "::notice::No feedback mentions found"
+          fi
+
+      - name: Upload Feedback Section
+        uses: actions/upload-artifact@v4
+        with:
+          name: feedback-section-${{ github.run_id }}
+          path: feedback_section.txt
+          retention-days: 7
+
+  # Job 5: Generate Digest (Depends on Transform, GDrive, and Feedback)
   generate-digest:
     name: Generate Team Digest with Claude
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [transform-data, export-gdrive]
+    needs: [transform-data, export-gdrive, extract-feedback]
     if: needs.transform-data.outputs.transform-status == 'success' && needs.export-gdrive.outputs.gdrive-status == 'success' && github.event.inputs.skip_digest != 'true'
     outputs:
       digest-status: ${{ steps.digest-status.outputs.status }}
@@ -257,42 +299,55 @@ jobs:
         with:
           name: transformed-data-${{ github.run_id }}
           path: transformed_data/
-      
+
+      - name: Download Feedback Section
+        uses: actions/download-artifact@v4
+        with:
+          name: feedback-section-${{ github.run_id }}
+          path: ./
+
       - name: Download Google Drive Data
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
           name: gdrive-data-${{ github.run_id }}
           path: gdrive_data/
-      
+
       - name: Create empty gdrive_data if needed
         run: |
           mkdir -p gdrive_data
           echo "Ensured gdrive_data directory exists (may be empty, which is normal)"
-      
+
       - name: Prepare prompt
         run: |
           DIGEST_DATE=$(date +%Y-%m-%d)
           DIGEST_FILE="digest_${DIGEST_DATE}.md"
           echo "DIGEST_FILE=$DIGEST_FILE" >> $GITHUB_ENV
-          
+
           # Debug: Show what files Claude will process
           echo "Files available for Claude:"
-          ls -la transformed_data/ gdrive_data/ agent_memory/ 2>/dev/null || true
-          
-          # Create combined prompt with only runtime-specific information
+          ls -la transformed_data/ gdrive_data/ agent_memory/ feedback_section.txt 2>/dev/null || true
+
+          # Read feedback section
+          FEEDBACK_CONTENT=$(cat feedback_section.txt 2>/dev/null || echo "")
+
+          # Read team coach prompt and replace {{FEEDBACK_SECTION}}
+          COACH_PROMPT=$(cat config/team_coach_prompt.md)
+          COACH_PROMPT_WITH_FEEDBACK="${COACH_PROMPT//\{\{FEEDBACK_SECTION\}\}/$FEEDBACK_CONTENT}"
+
+          # Create combined prompt with feedback integrated
           cat > combined_prompt.txt <<EOF
           Write the digest to a file named: $DIGEST_FILE
-          
+
           Available data folders:
           - transformed_data/ - Today's Telegram messages
           - gdrive_data/ - Recent Google Drive documents
           - agent_memory/ - Your persistent memory (read/write)
-          
-          $(cat config/team_coach_prompt.md)
+
+          $COACH_PROMPT_WITH_FEEDBACK
           EOF
-          
-          echo "::notice::Prompt prepared for digest generation"
+
+          echo "::notice::Prompt prepared with feedback section integrated"
       
       # Generate digest using official Claude Code action
       - name: Generate Team Digest
@@ -348,7 +403,7 @@ jobs:
           echo "status=success" >> $GITHUB_OUTPUT
           echo "filename=digest_$(date +%Y-%m-%d).md" >> $GITHUB_OUTPUT
 
-  # Job 5: Upload to Google Drive (Parallel Distribution)
+  # Job 6: Upload to Google Drive (Parallel Distribution)
   upload-digest:
     name: Upload to Google Drive
     runs-on: ubuntu-latest
@@ -388,7 +443,7 @@ jobs:
           echo "url=$SHARE_LINK" >> $GITHUB_OUTPUT
           echo "::notice::Uploaded to Google Drive: $SHARE_LINK"
 
-  # Job 6: Send Telegram Notification (Parallel Distribution)
+  # Job 7: Send Telegram Notification (Parallel Distribution)
   notify-team:
     name: Send Telegram Notification
     runs-on: ubuntu-latest
@@ -427,7 +482,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     if: always()
-    needs: [export-telegram, export-gdrive, transform-data, generate-digest, upload-digest, notify-team]
+    needs: [export-telegram, export-gdrive, transform-data, extract-feedback, generate-digest, upload-digest, notify-team]
     steps:
       - name: Generate Workflow Summary
         run: |
@@ -437,6 +492,7 @@ jobs:
           echo "- **Telegram Export**: ${{ needs.export-telegram.result == 'success' && '✅' || '❌' }} ${{ needs.export-telegram.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Google Drive Export**: ${{ needs.export-gdrive.result == 'success' && '✅' || '❌' }} ${{ needs.export-gdrive.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Data Transform**: ${{ needs.transform-data.result == 'success' && '✅' || '❌' }} ${{ needs.transform-data.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Feedback Extraction**: ${{ needs.extract-feedback.result == 'success' && '✅' || '❌' }} ${{ needs.extract-feedback.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Digest Generation**: ${{ needs.generate-digest.result == 'success' && '✅' || '❌' }} ${{ needs.generate-digest.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Google Drive Upload**: ${{ needs.upload-digest.result == 'success' && '✅' || needs.upload-digest.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.upload-digest.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Telegram Notification**: ${{ needs.notify-team.result == 'success' && '✅' || needs.notify-team.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.notify-team.result }}" >> $GITHUB_STEP_SUMMARY

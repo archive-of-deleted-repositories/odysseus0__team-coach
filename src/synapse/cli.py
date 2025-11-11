@@ -275,6 +275,35 @@ def upload_memory(
 
 
 @app.command()
+def extract_feedback(
+    transformed_dir: Path = typer.Argument(..., help='Directory with transformed markdown files'),
+    output_file: Path = typer.Option(Path('feedback_section.txt'), '--output', '-o', help='Output file for feedback section'),
+    bot_pattern: str = typer.Option("@synapse_x_bot", '--bot-pattern', '-b', help='Bot mention pattern to search for'),
+    context_lines: int = typer.Option(5, '--context', '-c', help='Number of context lines before/after mention'),
+):
+    """Extract bot mentions from transformed Telegram messages for coach feedback."""
+    from synapse.processors.feedback_extractor import extract_bot_mentions, save_feedback_section
+
+    typer.echo(f'🔍 Scanning {transformed_dir} for "{bot_pattern}" mentions...')
+
+    feedback_text = extract_bot_mentions(transformed_dir, bot_pattern, context_lines)
+
+    if not feedback_text:
+        typer.echo('✅ No feedback mentions found')
+        # Create empty file so workflow doesn't fail
+        output_file.write_text("", encoding='utf-8')
+        return
+
+    # Count mentions
+    mention_count = feedback_text.count("### Team Mention #")
+    typer.echo(f'✅ Found {mention_count} feedback mention(s)')
+
+    # Save to file
+    save_feedback_section(feedback_text, output_file)
+    typer.echo(f'📄 Feedback section saved to {output_file}')
+
+
+@app.command()
 def notify(
     message: str | None = typer.Argument(None, help='Message to send (reads from stdin if not provided)'),
     bot_token: str | None = typer.Option(None, '--token', '-t', help='Telegram bot token'),
