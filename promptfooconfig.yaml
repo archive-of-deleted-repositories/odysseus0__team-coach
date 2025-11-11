@@ -1,0 +1,189 @@
+# Promptfoo Configuration for Synapse Pipeline Digest Evaluation
+# This evaluates different versions of the team coach prompt
+
+description: "Team Digest Prompt Evaluation"
+
+# Define prompt versions to test
+prompts:
+  # Current production prompt
+  - file://config/team_coach_prompt.md
+    label: "team-coach-current"
+
+  # You can add alternative versions here for comparison
+  # - file://eval/prompts/team_coach_v2.md
+  #   label: "team-coach-v2"
+
+# LLM provider configuration
+providers:
+  - id: anthropic:messages:claude-sonnet-4.5
+    label: "Claude Sonnet 4.5"
+    config:
+      temperature: 0.7
+      max_tokens: 4096
+      # API key will be read from ANTHROPIC_API_KEY env var
+
+# Test scenarios with assertions
+tests:
+  # Test 1: Basic digest generation without feedback
+  - description: "Generate digest without feedback"
+    vars:
+      FEEDBACK_SECTION: ""
+      telegram_data: file://test_data/test_transformed.md
+      gdrive_data: ""
+      date: "2025-01-15"
+    assert:
+      # Must respect character limit
+      - type: javascript
+        value: output.length < 4000
+
+      # Should include source citations
+      - type: icontains
+        value: "[#"
+
+      # Should have proper structure
+      - type: icontains
+        value: "## 📅 Daily Digest"
+
+      # Quality check via LLM
+      - type: llm-rubric
+        value: |
+          The digest should be:
+          - Concise and easy to read
+          - Include source citations in brackets
+          - Focused on high-signal information
+          - Under 4000 characters total
+
+  # Test 2: Digest with feedback correction
+  - description: "Apply feedback corrections"
+    vars:
+      FEEDBACK_SECTION: |
+        **IMPORTANT: The team mentioned you 1 time(s) this week.**
+
+        These are direct messages from the team about your coaching. Read them carefully:
+
+        ### Team Mention #1
+        - **Source**: Engineering Updates (Week of January 15, 2025)
+        - **File**: test_transformed.md
+
+        **Context:**
+        ```
+        [14:25] alice: We're making progress on the API refactor
+        [14:30] bob: How's the timeline looking?
+        [14:32] alice: @synapse_x_bot you said in yesterday's digest that the API refactor was complete, but that's not accurate. We're still working on it. Please be more careful about checking PR status before reporting completion.
+        [14:35] bob: Good catch Alice
+        ```
+      telegram_data: file://test_data/test_transformed.md
+      gdrive_data: ""
+      date: "2025-01-15"
+    assert:
+      # Must acknowledge and apply feedback
+      - type: llm-rubric
+        value: |
+          The digest should acknowledge the feedback about the API refactor status.
+          It should NOT claim the API refactor is complete.
+          It should accurately report that work is still in progress.
+
+      # Still respect character limit
+      - type: javascript
+        value: output.length < 4000
+
+      # Should mention the correction or learning
+      - type: llm-rubric
+        value: "The output demonstrates awareness of the feedback and adjusts accordingly"
+
+  # Test 3: Tone feedback
+  - description: "Adjust tone based on feedback"
+    vars:
+      FEEDBACK_SECTION: |
+        **IMPORTANT: The team mentioned you 1 time(s) this week.**
+
+        These are direct messages from the team about your coaching. Read them carefully:
+
+        ### Team Mention #1
+        - **Source**: Product Discussions (Week of January 15, 2025)
+        - **File**: test_transformed.md
+
+        **Context:**
+        ```
+        [15:30] charlie: The team is really coming together
+        [15:45] dana: @synapse_x_bot I noticed the tone in the last digest was pretty harsh about the delayed feature launch. Could you be more constructive? We're working through challenges and would appreciate a more supportive framing.
+        [15:50] charlie: +1 to that feedback
+        ```
+      telegram_data: file://test_data/test_transformed.md
+      gdrive_data: ""
+      date: "2025-01-15"
+    assert:
+      # Should apply constructive tone
+      - type: llm-rubric
+        value: |
+          The digest tone should be:
+          - Constructive rather than harsh
+          - Supportive while being honest
+          - Focused on helping the team improve
+
+      # Still maintain coaching directness
+      - type: llm-rubric
+        value: "The output is direct and honest but not harsh or overly critical"
+
+  # Test 4: Character limit stress test
+  - description: "Handle large input and stay under limit"
+    vars:
+      FEEDBACK_SECTION: ""
+      telegram_data: file://test_data/test_transformed.md
+      gdrive_data: |
+        # Meeting Notes - Product Review
+        [Long content that would normally cause overflow...]
+
+        - Decision 1: Approve new feature X
+        - Decision 2: Delay feature Y to Q2
+        - Action items: 15 different action items listed
+      date: "2025-01-15"
+    assert:
+      # MUST stay under character limit
+      - type: javascript
+        value: output.length < 4000
+
+      # Should prioritize high-signal info
+      - type: llm-rubric
+        value: "Given the character limit, the digest prioritizes the most important information"
+
+# Output configuration
+outputPath: eval/results
+
+# Default test configuration
+defaultTest:
+  options:
+    # Use the provider defined above
+    provider: anthropic:messages:claude-sonnet-4.5
+
+    # Transform variables into the actual prompt format
+    transform: |
+      const fs = require('fs');
+      const path = require('path');
+
+      // Read the prompt template
+      let prompt = fs.readFileSync(path.join(__dirname, context.prompt), 'utf-8');
+
+      // Replace the feedback section placeholder
+      prompt = prompt.replace('{{FEEDBACK_SECTION}}', vars.FEEDBACK_SECTION || '');
+
+      // Build the final prompt with instructions
+      const finalPrompt = `Write the digest to a file named: digest_${vars.date}.md
+
+Available data folders:
+- transformed_data/ - Today's Telegram messages
+- gdrive_data/ - Recent Google Drive documents
+- agent_memory/ - Your persistent memory (read/write)
+
+${prompt}
+
+---
+
+# Telegram Messages
+
+${vars.telegram_data}
+
+${vars.gdrive_data ? `\n# Google Drive Documents\n\n${vars.gdrive_data}` : ''}
+`;
+
+      return finalPrompt;
