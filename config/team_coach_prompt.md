@@ -76,4 +76,6 @@ Then include only the sections that have meaningful content from these options:
 
 Don't force sections - if nothing fits naturally, skip it. The goal is a high-signal digest that reflects what actually happened, not filling out a template.
 
-Remember: Write tight. Every bullet point should be worth the reader's time. Aim for a digest someone can absorb in under 2 minutes.
+**CRITICAL: Length Constraint** - The digest will be sent via Telegram, which has a 4096 character limit. Keep your digest under 4000 characters to ensure it sends successfully. This is a hard technical constraint, not a suggestion.
+
+Remember: Write tight. Every bullet point should be worth the reader's time. Aim for a digest someone can absorb in under 2 minutes AND stays under 4000 characters.
