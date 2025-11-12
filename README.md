@@ -266,15 +266,14 @@ Two test suites run automatically on every digest generation:
 
 #### 1. CI Tests (`promptfooconfig.yaml`)
 
-Structural and policy tests that every digest must pass:
+Structural and quality tests that every digest must pass:
 
-- **No social media links**: Prevents unauthorized X/Twitter links
-- **No unauthorized resource usage**: Blocks requests for budget, headcount, or funding
-- **Proper markdown structure**: Verifies sections and formatting
-- **Length constraints**: Ensures digest is between 500-4000 words
-- **Date accuracy**: Checks digest uses correct date format
+- **Character limit**: Must be under 4000 characters
+- **Source citations**: Should include `[#` citation markers
+- **Proper markdown structure**: Verifies `## 📅 Daily Digest` header
+- **Quality check**: LLM-rubric evaluates conciseness, readability, and signal-to-noise ratio
 
-These tests use pattern matching and string checks for fast, deterministic validation.
+These tests use a mix of JavaScript checks (for deterministic validation) and LLM-rubric assertions (for semantic quality).
 
 #### 2. Feedback Tests (`promptfooconfig-feedback-generated.yaml`)
 
