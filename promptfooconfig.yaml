@@ -5,9 +5,7 @@ description: "Team Digest Prompt Evaluation"
 
 # Define prompt versions to test
 prompts:
-  # Current production prompt
   - file://config/team_coach_prompt.md
-    label: "team-coach-current"
 
   # You can add alternative versions here for comparison
   # - file://eval/prompts/team_coach_v2.md
@@ -15,7 +13,7 @@ prompts:
 
 # LLM provider configuration
 providers:
-  - id: anthropic:messages:claude-sonnet-4.5
+  - id: anthropic:messages:claude-sonnet-4-5-20250929
     label: "Claude Sonnet 4.5"
     config:
       temperature: 0.7
@@ -154,36 +152,7 @@ outputPath: eval/results
 defaultTest:
   options:
     # Use the provider defined above
-    provider: anthropic:messages:claude-sonnet-4.5
+    provider: anthropic:messages:claude-sonnet-4-5-20250929
 
     # Transform variables into the actual prompt format
-    transform: |
-      const fs = require('fs');
-      const path = require('path');
-
-      // Read the prompt template
-      let prompt = fs.readFileSync(path.join(__dirname, context.prompt), 'utf-8');
-
-      // Replace the feedback section placeholder
-      prompt = prompt.replace('{{FEEDBACK_SECTION}}', vars.FEEDBACK_SECTION || '');
-
-      // Build the final prompt with instructions
-      const finalPrompt = `Write the digest to a file named: digest_${vars.date}.md
-
-Available data folders:
-- transformed_data/ - Today's Telegram messages
-- gdrive_data/ - Recent Google Drive documents
-- agent_memory/ - Your persistent memory (read/write)
-
-${prompt}
-
----
-
-# Telegram Messages
-
-${vars.telegram_data}
-
-${vars.gdrive_data ? `\n# Google Drive Documents\n\n${vars.gdrive_data}` : ''}
-`;
-
-      return finalPrompt;
+    transform: file://eval/transform.js
