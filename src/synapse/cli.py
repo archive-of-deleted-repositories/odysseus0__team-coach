@@ -276,7 +276,7 @@ def upload_memory(
 
 @app.command()
 def extract_feedback(
-    transformed_dir: Path = typer.Argument(..., help='Directory with transformed markdown files'),
+    transformed_dirs: list[Path] = typer.Argument(..., help='Directories with transformed markdown files (can specify multiple)'),
     output_file: Path = typer.Option(Path('feedback_section.txt'), '--output', '-o', help='Output file for feedback section'),
     bot_pattern: str = typer.Option("@synapse_x_bot", '--bot-pattern', '-b', help='Bot mention pattern to search for'),
     context_lines: int = typer.Option(5, '--context', '-c', help='Number of context lines before/after mention'),
@@ -284,18 +284,20 @@ def extract_feedback(
     export_json: Path | None = typer.Option(None, '--export-json', '-j', help='Export structured feedback as JSON for testing'),
 ):
     """Extract bot mentions from transformed Telegram messages for coach feedback."""
-    from synapse.processors.feedback_extractor import extract_bot_mentions, save_feedback_section, export_feedback_for_testing
+    from synapse.processors.feedback_extractor import extract_bot_mentions_from_dirs, save_feedback_section, export_feedback_from_dirs
 
-    typer.echo(f'🔍 Scanning {transformed_dir} for "{bot_pattern}" mentions...')
+    typer.echo(f'🔍 Scanning {len(transformed_dirs)} director{"y" if len(transformed_dirs) == 1 else "ies"} for "{bot_pattern}" mentions...')
+    for dir in transformed_dirs:
+        typer.echo(f'  - {dir}')
 
-    feedback_text = extract_bot_mentions(transformed_dir, bot_pattern, context_lines, immediate_days)
+    feedback_text = extract_bot_mentions_from_dirs(transformed_dirs, bot_pattern, context_lines, immediate_days)
 
     if not feedback_text:
         typer.echo('✅ No feedback mentions found')
         # Create empty file so workflow doesn't fail
         output_file.write_text("", encoding='utf-8')
         if export_json:
-            export_feedback_for_testing(transformed_dir, export_json, bot_pattern, context_lines, immediate_days)
+            export_feedback_from_dirs(transformed_dirs, export_json, bot_pattern, context_lines, immediate_days)
         return
 
     # Count mentions
@@ -309,7 +311,7 @@ def extract_feedback(
 
     # Export structured JSON if requested
     if export_json:
-        export_feedback_for_testing(transformed_dir, export_json, bot_pattern, context_lines, immediate_days)
+        export_feedback_from_dirs(transformed_dirs, export_json, bot_pattern, context_lines, immediate_days)
         typer.echo(f'📊 Structured feedback exported to {export_json}')
 
 

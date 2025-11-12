@@ -69,7 +69,7 @@ jobs:
           SYNAPSE_TELEGRAM__API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           SYNAPSE_TELEGRAM__SESSION_STRING: ${{ secrets.TELEGRAM_SESSION_STRING }}
         run: |
-          START_DATE=$(date -d "${{ github.event.inputs.start_days_ago || '30' }} days ago" +%Y-%m-%d)
+          START_DATE=$(date -d "${{ github.event.inputs.start_days_ago || '1' }} days ago" +%Y-%m-%d)
           uv run synapse-pipeline export-telegram \
             --start "$START_DATE" \
             --end "$(date +%Y-%m-%d)" \
@@ -242,6 +242,8 @@ jobs:
 
       - name: Extract Feedback Mentions
         run: |
+          # Extract bot mentions from current day's messages only
+          # (Agent memory context is already included in digest generation)
           uv run synapse-pipeline extract-feedback \
             ./transformed_data \
             --output feedback_section.txt \
