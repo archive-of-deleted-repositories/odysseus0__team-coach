@@ -173,17 +173,19 @@ Tests use real data samples in `tests/data/`. The test suite covers:
 
 Two test suites run on every digest:
 
-1. **CI Tests** (`promptfooconfig.yaml`):
-   - No social media links
-   - No unauthorized resource usage
-   - Proper markdown structure
-   - Length constraints
+1. **CI Tests** (`promptfooconfig.yaml`) - Fast, deterministic validation:
+   - Character limit (under 4000 characters)
+   - Source citations (includes `[#` markers)
+   - Proper markdown structure (has `## 📅 Daily Digest` header)
+   - **No LLM evaluations** - only JavaScript and string matching for speed and cost
 
-2. **Feedback Tests** (`promptfooconfig-feedback-generated.yaml`):
+2. **Feedback Tests** (`promptfooconfig-feedback-generated.yaml`) - LLM-based semantic evaluation:
    - Generated dynamically from `feedback_items.json`
    - Tests that Claude acknowledged and applied each correction
-   - Uses `llm-rubric` for semantic evaluation
+   - Uses `llm-rubric` for semantic evaluation (the ONLY llm-rubric tests)
    - Fails if Claude repeats mistakes the team corrected
+
+**Design rationale**: LLM evaluations are expensive and slow. Only use them where they provide unique value - verifying feedback adherence. Structural validation should be deterministic.
 
 Results uploaded to `team_digests_folder/evaluations/YYYY-MM-DD/` in Google Drive.
 

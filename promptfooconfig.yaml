@@ -42,15 +42,6 @@ tests:
       - type: icontains
         value: "## 📅 Daily Digest"
 
-      # Quality check via LLM
-      - type: llm-rubric
-        value: |
-          The digest should be:
-          - Concise and easy to read
-          - Include source citations in brackets
-          - Focused on high-signal information
-          - Under 4000 characters total
-
   # Test 2: Digest with feedback correction
   - description: "Apply feedback corrections"
     vars:
@@ -74,20 +65,9 @@ tests:
       gdrive_data: ""
       date: "2025-01-15"
     assert:
-      # Must acknowledge and apply feedback
-      - type: llm-rubric
-        value: |
-          The digest should acknowledge the feedback about the API refactor status.
-          It should NOT claim the API refactor is complete.
-          It should accurately report that work is still in progress.
-
       # Still respect character limit
       - type: javascript
         value: output.length < 4000
-
-      # Should mention the correction or learning
-      - type: llm-rubric
-        value: "The output demonstrates awareness of the feedback and adjusts accordingly"
 
   # Test 3: Tone feedback
   - description: "Adjust tone based on feedback"
@@ -111,17 +91,9 @@ tests:
       gdrive_data: ""
       date: "2025-01-15"
     assert:
-      # Should apply constructive tone
-      - type: llm-rubric
-        value: |
-          The digest tone should be:
-          - Constructive rather than harsh
-          - Supportive while being honest
-          - Focused on helping the team improve
-
-      # Still maintain coaching directness
-      - type: llm-rubric
-        value: "The output is direct and honest but not harsh or overly critical"
+      # Character limit check
+      - type: javascript
+        value: output.length < 4000
 
   # Test 4: Character limit stress test
   - description: "Handle large input and stay under limit"
@@ -140,10 +112,6 @@ tests:
       # MUST stay under character limit
       - type: javascript
         value: output.length < 4000
-
-      # Should prioritize high-signal info
-      - type: llm-rubric
-        value: "Given the character limit, the digest prioritizes the most important information"
 
 # Output configuration
 outputPath: eval/results
