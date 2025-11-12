@@ -5,13 +5,16 @@ Context syncing tool for remote teams that automatically generates organizationa
 ## Features
 
 - **Telegram API Integration**: Export messages directly from Telegram using telethon
-- Transform Telegram JSON exports to clean markdown format
+- **Feedback Loop System**: Team members can mention `@synapse_x_bot` to provide corrections that are automatically extracted and incorporated into future digests
+- Transform Telegram JSON exports to clean markdown format with full timestamps
 - Organize messages by channels/topics
 - Preserve reactions, media references, and threading
 - Batch processing support
 - List available channels and authenticate with session strings
+- **Agent Memory System**: Past digests and coaching corrections accumulate as context over time
 - Google Drive integration for downloading team data and uploading digests
 - Automatic share link generation for uploaded digests
+- **LLM Evaluation**: Promptfoo test suites verify digest quality and feedback responsiveness
 
 ## Prerequisites
 
@@ -214,6 +217,44 @@ synapse-pipeline notify "Hello team" --token BOT_TOKEN --chat CHAT_ID
 # Send to a specific topic/thread
 synapse-pipeline notify "New digest available" --thread THREAD_ID
 ```
+
+### Extract feedback mentions
+
+```bash
+# Extract from current day's Telegram messages
+synapse-pipeline extract-feedback ./transformed_data --output feedback.txt
+
+# Extract from multiple directories (e.g., current + historical)
+synapse-pipeline extract-feedback ./transformed_data ./agent_memory --export-json feedback.json
+```
+
+## How the Feedback Loop Works
+
+The system includes a self-improving feedback mechanism:
+
+1. **Team gives correction**: Mention `@synapse_x_bot` in Telegram with your feedback
+   ```
+   @synapse_x_bot you're being too optimistic - we haven't validated PMF yet
+   ```
+
+2. **Automatic extraction**: The pipeline extracts bot mentions with surrounding context
+
+3. **Prompt injection**: Corrections are prepended to the digest generation prompt:
+   ```markdown
+   **IMMEDIATE FEEDBACK (1 item): Must address in today's digest**
+
+   The team gave you direct corrections recently. You MUST acknowledge and apply these today:
+
+   ### Immediate Feedback #1
+   - **Source**: Team Channel (2025-11-12)
+   [Full conversation context]
+   ```
+
+4. **Verified application**: Promptfoo tests verify Claude acknowledged and applied the correction
+
+5. **Long-term memory**: Agent memory accumulates coaching corrections for ongoing context
+
+This creates a feedback loop where the bot learns from team corrections over time.
 
 ## GitHub Actions Setup
 
