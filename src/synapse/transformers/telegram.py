@@ -68,8 +68,8 @@ class TelegramMessage(BaseModel):
 
     @property
     def formatted_time(self) -> str:
-        """Format timestamp as HH:MM."""
-        return self.date.strftime('%H:%M')
+        """Format timestamp as YYYY-MM-DD HH:MM."""
+        return self.date.strftime('%Y-%m-%d %H:%M')
 
     @property
     def media_indicators(self) -> list[str]:

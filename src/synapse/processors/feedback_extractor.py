@@ -43,7 +43,7 @@ def extract_bot_mentions(
             print(f"Warning: Could not read {md_file}: {e}")
             continue
 
-        # Parse date from filename (format: telegram_YYYY-MM-DD_*.md)
+        # Parse date from filename (used as fallback)
         file_date = None
         date_match = re.search(r'(\d{4}-\d{2}-\d{2})', md_file.name)
         if date_match:
@@ -51,8 +51,6 @@ def extract_bot_mentions(
                 file_date = datetime.strptime(date_match.group(1), '%Y-%m-%d')
             except ValueError:
                 pass
-
-        is_immediate = file_date and file_date >= immediate_cutoff if file_date else False
 
         lines = content.split('\n')
 
@@ -74,12 +72,21 @@ def extract_bot_mentions(
                         channel = lines[j].replace("## ", "").strip()
                         break
 
-                # Get date from file or transcript header
-                week_date = file_date.strftime('%Y-%m-%d') if file_date else "Unknown Date"
-                for line_content in lines[:10]:  # Check first 10 lines for date
-                    if "Week of" in line_content:
-                        week_date = line_content.replace("Week of", "").strip()
-                        break
+                # Parse actual message date from timestamp in line (format: [YYYY-MM-DD HH:MM])
+                message_date = file_date  # Fallback to file date
+                timestamp_match = re.search(r'\[(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})\]', line)
+                if timestamp_match:
+                    try:
+                        date_str = timestamp_match.group(1)
+                        message_date = datetime.strptime(date_str, '%Y-%m-%d')
+                    except ValueError:
+                        pass
+
+                # Determine if feedback is immediate based on actual message date
+                is_immediate = message_date and message_date >= immediate_cutoff if message_date else False
+
+                # Format date for display
+                week_date = message_date.strftime('%Y-%m-%d') if message_date else "Unknown Date"
 
                 mentions.append({
                     'file': md_file.name,
@@ -89,7 +96,7 @@ def extract_bot_mentions(
                     'context': '\n'.join(context_block),
                     'mention_line': line,
                     'is_immediate': is_immediate,
-                    'file_date': file_date.isoformat() if file_date else None
+                    'file_date': message_date.isoformat() if message_date else None
                 })
 
             except Exception as e:
@@ -193,7 +200,7 @@ def export_feedback_for_testing(
         except Exception:
             continue
 
-        # Parse date from filename
+        # Parse date from filename (used as fallback)
         file_date = None
         date_match = re.search(r'(\d{4}-\d{2}-\d{2})', md_file.name)
         if date_match:
@@ -201,8 +208,6 @@ def export_feedback_for_testing(
                 file_date = datetime.strptime(date_match.group(1), '%Y-%m-%d')
             except ValueError:
                 pass
-
-        is_immediate = file_date and file_date >= immediate_cutoff if file_date else False
 
         lines = content.split('\n')
 
@@ -223,11 +228,24 @@ def export_feedback_for_testing(
                     channel = lines[j].replace("## ", "").strip()
                     break
 
+            # Parse actual message date from timestamp in line (format: [YYYY-MM-DD HH:MM])
+            message_date = file_date  # Fallback to file date
+            timestamp_match = re.search(r'\[(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})\]', line)
+            if timestamp_match:
+                try:
+                    date_str = timestamp_match.group(1)
+                    message_date = datetime.strptime(date_str, '%Y-%m-%d')
+                except ValueError:
+                    pass
+
+            # Determine if feedback is immediate based on actual message date
+            is_immediate = message_date and message_date >= immediate_cutoff if message_date else False
+
             mentions.append({
                 'id': f"{md_file.stem}_{i}",
                 'file': md_file.name,
                 'channel': channel,
-                'date': file_date.isoformat() if file_date else None,
+                'date': message_date.isoformat() if message_date else None,
                 'line_num': i + 1,
                 'context': context_block,
                 'mention_line': line.strip(),
