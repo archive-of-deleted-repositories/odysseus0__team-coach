@@ -471,7 +471,9 @@ jobs:
           node-version: '18'
 
       - name: Install Promptfoo
-        run: npm install -g promptfoo js-yaml
+        run: |
+          npm install -g promptfoo
+          npm install js-yaml
 
       - name: Download Digest
         uses: actions/download-artifact@v4
