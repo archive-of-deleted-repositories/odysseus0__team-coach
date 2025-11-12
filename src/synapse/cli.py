@@ -302,8 +302,7 @@ def extract_feedback(
 
     # Count mentions
     immediate_count = feedback_text.count("### Immediate Feedback #")
-    historical_count = feedback_text.count("### Historical Feedback #")
-    typer.echo(f'✅ Found {immediate_count} immediate + {historical_count} historical feedback mention(s)')
+    typer.echo(f'✅ Found {immediate_count} immediate feedback mention(s)')
 
     # Save to file
     save_feedback_section(feedback_text, output_file)

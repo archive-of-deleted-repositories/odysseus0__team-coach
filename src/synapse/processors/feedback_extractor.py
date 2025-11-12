@@ -106,52 +106,29 @@ def extract_bot_mentions(
     if not mentions:
         return ""
 
-    # Separate immediate and historical feedback
+    # Only include immediate feedback (within the cutoff period)
     immediate_mentions = [m for m in mentions if m['is_immediate']]
-    historical_mentions = [m for m in mentions if not m['is_immediate']]
+
+    if not immediate_mentions:
+        return ""
 
     # Format as a natural coaching section
     output_lines = []
+    output_lines.append(f"**IMMEDIATE FEEDBACK ({len(immediate_mentions)} item(s)): Must address in today's digest**")
+    output_lines.append("")
+    output_lines.append("The team gave you direct corrections recently. You MUST acknowledge and apply these today:")
+    output_lines.append("")
 
-    # Immediate feedback section (must address today)
-    if immediate_mentions:
-        output_lines.append(f"**IMMEDIATE FEEDBACK ({len(immediate_mentions)} item(s)): Must address in today's digest**")
+    for idx, mention in enumerate(immediate_mentions, 1):
+        output_lines.append(f"### Immediate Feedback #{idx}")
+        output_lines.append(f"- **Source**: {mention['channel']} ({mention['week_date']})")
+        output_lines.append(f"- **File**: {mention['file']}")
         output_lines.append("")
-        output_lines.append("The team gave you direct corrections recently. You MUST acknowledge and apply these today:")
+        output_lines.append("**Context:**")
+        output_lines.append("```")
+        output_lines.append(mention['context'])
+        output_lines.append("```")
         output_lines.append("")
-
-        for idx, mention in enumerate(immediate_mentions, 1):
-            output_lines.append(f"### Immediate Feedback #{idx}")
-            output_lines.append(f"- **Source**: {mention['channel']} ({mention['week_date']})")
-            output_lines.append(f"- **File**: {mention['file']}")
-            output_lines.append("")
-            output_lines.append("**Context:**")
-            output_lines.append("```")
-            output_lines.append(mention['context'])
-            output_lines.append("```")
-            output_lines.append("")
-
-    # Historical feedback section (ongoing context)
-    if historical_mentions:
-        if immediate_mentions:
-            output_lines.append("---")
-            output_lines.append("")
-
-        output_lines.append(f"**HISTORICAL CONTEXT ({len(historical_mentions)} item(s)): Keep in mind**")
-        output_lines.append("")
-        output_lines.append("Past feedback from the team. These may already be resolved, but keep them in mind to avoid repeating mistakes:")
-        output_lines.append("")
-
-        for idx, mention in enumerate(historical_mentions, 1):
-            output_lines.append(f"### Historical Feedback #{idx}")
-            output_lines.append(f"- **Source**: {mention['channel']} ({mention['week_date']})")
-            output_lines.append(f"- **File**: {mention['file']}")
-            output_lines.append("")
-            output_lines.append("**Context:**")
-            output_lines.append("```")
-            output_lines.append(mention['context'])
-            output_lines.append("```")
-            output_lines.append("")
 
     return '\n'.join(output_lines)
 
@@ -268,52 +245,29 @@ def extract_bot_mentions_from_dirs(
     if not all_mentions:
         return ""
 
-    # Separate immediate and historical feedback
+    # Only include immediate feedback (within the cutoff period)
     immediate_mentions = [m for m in all_mentions if m['is_immediate']]
-    historical_mentions = [m for m in all_mentions if not m['is_immediate']]
+
+    if not immediate_mentions:
+        return ""
 
     # Format as a natural coaching section
     output_lines = []
+    output_lines.append(f"**IMMEDIATE FEEDBACK ({len(immediate_mentions)} item(s)): Must address in today's digest**")
+    output_lines.append("")
+    output_lines.append("The team gave you direct corrections recently. You MUST acknowledge and apply these today:")
+    output_lines.append("")
 
-    # Immediate feedback section (must address today)
-    if immediate_mentions:
-        output_lines.append(f"**IMMEDIATE FEEDBACK ({len(immediate_mentions)} item(s)): Must address in today's digest**")
+    for idx, mention in enumerate(immediate_mentions, 1):
+        output_lines.append(f"### Immediate Feedback #{idx}")
+        output_lines.append(f"- **Source**: {mention['channel']} ({mention['week_date']})")
+        output_lines.append(f"- **File**: {mention['file']}")
         output_lines.append("")
-        output_lines.append("The team gave you direct corrections recently. You MUST acknowledge and apply these today:")
+        output_lines.append("**Context:**")
+        output_lines.append("```")
+        output_lines.append(mention['context'])
+        output_lines.append("```")
         output_lines.append("")
-
-        for idx, mention in enumerate(immediate_mentions, 1):
-            output_lines.append(f"### Immediate Feedback #{idx}")
-            output_lines.append(f"- **Source**: {mention['channel']} ({mention['week_date']})")
-            output_lines.append(f"- **File**: {mention['file']}")
-            output_lines.append("")
-            output_lines.append("**Context:**")
-            output_lines.append("```")
-            output_lines.append(mention['context'])
-            output_lines.append("```")
-            output_lines.append("")
-
-    # Historical feedback section (ongoing context)
-    if historical_mentions:
-        if immediate_mentions:
-            output_lines.append("---")
-            output_lines.append("")
-
-        output_lines.append(f"**HISTORICAL CONTEXT ({len(historical_mentions)} item(s)): Keep in mind**")
-        output_lines.append("")
-        output_lines.append("Past feedback from the team. These may already be resolved, but keep them in mind to avoid repeating mistakes:")
-        output_lines.append("")
-
-        for idx, mention in enumerate(historical_mentions, 1):
-            output_lines.append(f"### Historical Feedback #{idx}")
-            output_lines.append(f"- **Source**: {mention['channel']} ({mention['week_date']})")
-            output_lines.append(f"- **File**: {mention['file']}")
-            output_lines.append("")
-            output_lines.append("**Context:**")
-            output_lines.append("```")
-            output_lines.append(mention['context'])
-            output_lines.append("```")
-            output_lines.append("")
 
     return '\n'.join(output_lines)
 
