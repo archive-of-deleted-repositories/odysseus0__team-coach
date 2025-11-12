@@ -1,0 +1,186 @@
+name: Evaluate Prompts with Live Data
+
+# Run evaluation against latest production data weekly or on-demand
+on:
+  schedule:
+    # Run every Monday at 9am UTC (after weekend digest generation)
+    - cron: '0 9 * * 1'
+  workflow_dispatch:  # Allow manual trigger
+    inputs:
+      run_id:
+        description: 'Specific workflow run ID to test (optional, uses latest if not provided)'
+        required: false
+        type: string
+
+jobs:
+  fetch-and-evaluate:
+    name: Fetch Live Data and Evaluate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Promptfoo
+        run: npm install -g promptfoo
+
+      - name: Install GitHub CLI
+        run: |
+          type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+
+      - name: Authenticate GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$GH_TOKEN" | gh auth login --with-token
+
+      - name: Fetch Latest Pipeline Data
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/fetch-live-data.sh
+          ./scripts/fetch-live-data.sh
+
+      - name: Setup Data Symlinks
+        run: |
+          chmod +x scripts/setup-live-data-links.sh
+          ./scripts/setup-live-data-links.sh
+
+      - name: Verify Live Data
+        run: |
+          echo "📊 Checking live data availability:"
+          echo ""
+
+          if [ ! -f "eval/test-data/live/telegram_latest.md" ]; then
+            echo "⚠️ No Telegram data found"
+          else
+            TELEGRAM_SIZE=$(wc -c < eval/test-data/live/telegram_latest.md)
+            echo "✓ Telegram data: $TELEGRAM_SIZE bytes"
+          fi
+
+          if [ ! -f "eval/test-data/live/gdrive_latest.md" ]; then
+            echo "⚠️ No GDrive data found"
+          else
+            GDRIVE_SIZE=$(wc -c < eval/test-data/live/gdrive_latest.md)
+            echo "✓ GDrive data: $GDRIVE_SIZE bytes"
+          fi
+
+          if [ ! -f "eval/test-data/live/feedback_latest.txt" ]; then
+            echo "⚠️ No feedback data found"
+          else
+            FEEDBACK_SIZE=$(wc -c < eval/test-data/live/feedback_latest.txt)
+            echo "✓ Feedback data: $FEEDBACK_SIZE bytes"
+          fi
+
+      - name: Run Live Data Evaluation
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+        run: |
+          promptfoo eval --config promptfooconfig.live.yaml --output eval/results/live/evaluation.json
+          echo "::notice::Live data evaluation completed"
+
+      - name: Generate Summary
+        if: always()
+        run: |
+          echo "## 🧪 Live Data Prompt Evaluation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Read metadata
+          if [ -f "eval/test-data/live/metadata.json" ]; then
+            RUN_ID=$(jq -r '.run_id' eval/test-data/live/metadata.json)
+            RUN_DATE=$(jq -r '.run_date' eval/test-data/live/metadata.json)
+            echo "**Tested Against:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Run ID: #$RUN_ID" >> $GITHUB_STEP_SUMMARY
+            echo "- Date: $RUN_DATE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Parse results
+          if [ -f "eval/results/live/evaluation.json" ]; then
+            TOTAL=$(jq '.results | length' eval/results/live/evaluation.json)
+            PASSED=$(jq '[.results[] | select(.success == true)] | length' eval/results/live/evaluation.json)
+            FAILED=$((TOTAL - PASSED))
+
+            echo "**Test Results:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Total Tests: $TOTAL" >> $GITHUB_STEP_SUMMARY
+            echo "- Passed: ✅ $PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "- Failed: ❌ $FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            if [ $FAILED -eq 0 ]; then
+              echo "### ✅ All tests passed against live production data!" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "### ⚠️ Some tests failed with live data" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "This may indicate:" >> $GITHUB_STEP_SUMMARY
+              echo "- Real-world edge cases the prompt doesn't handle well" >> $GITHUB_STEP_SUMMARY
+              echo "- Character limit issues with actual message volumes" >> $GITHUB_STEP_SUMMARY
+              echo "- Quality issues in production outputs" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "Review the artifacts for detailed analysis." >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⚠️ No evaluation results found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Live Data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-data-${{ github.run_id }}
+          path: eval/test-data/live/
+          retention-days: 30
+
+      - name: Upload Evaluation Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-evaluation-results-${{ github.run_id }}
+          path: eval/results/live/
+          retention-days: 30
+
+      - name: Create Issue on Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let body = '## 🚨 Live Data Prompt Evaluation Failed\n\n';
+            body += 'The automated evaluation against latest production data has failed.\n\n';
+
+            // Try to read metadata
+            try {
+              const metadata = JSON.parse(fs.readFileSync('eval/test-data/live/metadata.json', 'utf8'));
+              body += `**Tested Against:**\n`;
+              body += `- Run ID: #${metadata.run_id}\n`;
+              body += `- Date: ${metadata.run_date}\n\n`;
+            } catch (e) {
+              body += '**Tested Against:** Unable to read metadata\n\n';
+            }
+
+            body += `**Workflow Run:** https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n`;
+            body += '**Action Required:**\n';
+            body += '1. Review the evaluation results in the workflow artifacts\n';
+            body += '2. Check if the prompt needs adjustments for real-world data\n';
+            body += '3. Verify character limits are being respected\n';
+            body += '4. Update the prompt or tests as needed\n\n';
+            body += 'Labels: `prompt-evaluation`, `needs-investigation`';
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Live Data Prompt Evaluation Failed - ${new Date().toISOString().split('T')[0]}`,
+              body: body,
+              labels: ['prompt-evaluation', 'needs-investigation']
+            });

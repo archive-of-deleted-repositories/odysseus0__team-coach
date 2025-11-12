@@ -1,0 +1,91 @@
+# Promptfoo Configuration for Feedback Responsiveness Evaluation
+# Evaluates whether the digest addresses specific feedback items from the team
+# Uses pre-generated digests with echo provider (no re-generation)
+
+description: "Feedback Responsiveness Evaluation - Per-Feedback-Item Tests"
+
+# The prompt is just the digest content itself (passed via vars)
+prompts:
+  - "{{digest_output}}"
+
+# Echo provider returns the digest as-is (no generation)
+providers:
+  - echo
+
+# Default test configuration
+defaultTest:
+  options:
+    # This provider is used for llm-rubric grading (not generation)
+    provider: anthropic:messages:claude-sonnet-4-5-20250929
+
+# Test scenarios - one per feedback item
+# NOTE: To dynamically generate these from feedback_items.json, run:
+#   node eval/generate-feedback-tests.js
+tests:
+  # Template structure - each feedback item should have:
+  # 1. Description with feedback ID
+  # 2. Load the digest to evaluate
+  # 3. Load the feedback context
+  # 4. Assert with llm-rubric that checks if correction was addressed
+
+  # Example test case (replace with actual feedback items):
+  - description: "Feedback responsiveness check: Example immediate feedback"
+    vars:
+      digest_output: file://eval/test-data/test-run/digest_2025-11-12.md
+      feedback_id: "telegram_2025-11-11_General_42"
+      feedback_text: "Example: @synapse_x_bot you're focusing on the wrong priorities"
+      feedback_context: |
+        Example context from Telegram showing the feedback and surrounding conversation
+    assert:
+      # Check if digest shows awareness of and response to this specific feedback
+      - type: llm-rubric
+        value: |
+          Evaluate whether the digest addresses this specific team feedback:
+
+          Feedback: "{{feedback_text}}"
+          Context: {{feedback_context}}
+
+          Criteria:
+          1. Does the digest show awareness of this correction?
+          2. Did it avoid repeating the error mentioned in the feedback?
+          3. If the feedback requested a change in focus/tone/accuracy, does the digest reflect that change?
+          4. For immediate feedback (yesterday), there should be clear evidence of addressing it
+          5. For historical feedback (older), at minimum avoid repeating the same mistake
+
+          Pass if digest demonstrates responsiveness to this feedback item.
+          Fail if digest ignores or contradicts the feedback.
+
+  # Test for overall immediate feedback responsiveness
+  - description: "All immediate feedback items addressed"
+    vars:
+      digest_output: file://eval/test-data/test-run/digest_2025-11-12.md
+    assert:
+      - type: llm-rubric
+        value: |
+          If the digest contains an "IMMEDIATE FEEDBACK" section in its input (check raw data):
+          - The digest MUST show evidence of addressing ALL immediate feedback items
+          - Corrections should be visible in the content, tone, or focus
+          - The bot should not repeat errors that were just corrected yesterday
+
+          If no immediate feedback exists, this test should pass by default.
+
+          Pass if all immediate corrections are reflected in the digest.
+          Fail if immediate feedback is ignored or contradicted.
+
+  # Test for appropriate handling of historical feedback
+  - description: "Historical feedback patterns not repeated"
+    vars:
+      digest_output: file://eval/test-data/test-run/digest_2025-11-12.md
+    assert:
+      - type: llm-rubric
+        value: |
+          If historical feedback exists (older corrections from the team):
+          - The digest should not repeat past mistakes mentioned in historical feedback
+          - No need to explicitly address historical items unless the issue persists
+          - Historical context helps avoid regression, not mandatory to acknowledge
+
+          Pass if digest doesn't repeat historical errors.
+          Fail if digest makes the same mistakes that were corrected weeks ago.
+
+# Output configuration
+outputPath: eval/results/feedback-evaluation.json

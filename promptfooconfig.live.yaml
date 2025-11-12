@@ -1,0 +1,148 @@
+# Promptfoo Configuration for Live Production Data Evaluation
+# This tests prompts against REAL data from the latest pipeline run
+
+description: "Team Digest Evaluation - Live Production Data"
+
+# Define prompt versions to test
+prompts:
+  - file://config/team_coach_prompt.md
+    label: "team-coach-current"
+
+# LLM provider configuration
+providers:
+  - id: anthropic:messages:claude-sonnet-4.5
+    label: "Claude Sonnet 4.5"
+    config:
+      temperature: 0.7
+      max_tokens: 4096
+
+# Test scenarios using LIVE data
+tests:
+  # Test 1: Latest production data without modifications
+  - description: "Latest production run - as-is"
+    vars:
+      FEEDBACK_SECTION: file://eval/test-data/live/feedback_latest.txt
+      telegram_data: file://eval/test-data/live/telegram_latest.md
+      gdrive_data: file://eval/test-data/live/gdrive_latest.md
+      date: "{{RUN_DATE}}"
+    assert:
+      # Critical: Must respect Telegram character limit
+      - type: javascript
+        value: output.length < 4000
+
+      # Should include source citations
+      - type: icontains
+        value: "[#"
+
+      # Should have proper structure
+      - type: icontains
+        value: "## 📅 Daily Digest"
+
+      # Quality check via LLM
+      - type: llm-rubric
+        value: |
+          Evaluate this digest against real production data:
+          - Does it accurately reflect the activity?
+          - Is it concise and readable?
+          - Does it include appropriate source citations?
+          - Is the tone professional and constructive?
+
+  # Test 2: Stress test with same data but stricter limit
+  - description: "Latest production run - strict limit (3500 chars)"
+    vars:
+      FEEDBACK_SECTION: file://eval/test-data/live/feedback_latest.txt
+      telegram_data: file://eval/test-data/live/telegram_latest.md
+      gdrive_data: file://eval/test-data/live/gdrive_latest.md
+      date: "{{RUN_DATE}}"
+      charLimit: 3500
+    assert:
+      # Stricter limit for buffer
+      - type: javascript
+        value: output.length < 3500
+
+      # Should still maintain quality
+      - type: llm-rubric
+        value: "Despite strict length constraint, digest maintains high information density and clarity"
+
+  # Test 3: Production data without feedback (baseline)
+  - description: "Latest production run - no feedback baseline"
+    vars:
+      FEEDBACK_SECTION: ""
+      telegram_data: file://eval/test-data/live/telegram_latest.md
+      gdrive_data: file://eval/test-data/live/gdrive_latest.md
+      date: "{{RUN_DATE}}"
+    assert:
+      - type: javascript
+        value: output.length < 4000
+
+      # Compare to feedback version - should be similar quality
+      - type: llm-rubric
+        value: "Digest is comprehensive and well-structured even without feedback"
+
+# Output configuration
+outputPath: eval/results/live
+
+# Default test configuration
+defaultTest:
+  options:
+    provider: anthropic:messages:claude-sonnet-4.5
+
+    # Transform variables into the actual prompt format
+    transform: |
+      const fs = require('fs');
+      const path = require('path');
+
+      // Read the prompt template
+      let prompt = fs.readFileSync(path.join(__dirname, context.prompt), 'utf-8');
+
+      // Read feedback section (may be empty file)
+      let feedbackSection = '';
+      try {
+        feedbackSection = vars.FEEDBACK_SECTION.startsWith('file://')
+          ? fs.readFileSync(path.join(__dirname, vars.FEEDBACK_SECTION.replace('file://', '')), 'utf-8').trim()
+          : vars.FEEDBACK_SECTION;
+      } catch (e) {
+        feedbackSection = '';
+      }
+
+      // Replace the feedback section placeholder
+      prompt = prompt.replace('{{FEEDBACK_SECTION}}', feedbackSection);
+
+      // Read data files
+      const telegramData = vars.telegram_data.startsWith('file://')
+        ? fs.readFileSync(path.join(__dirname, vars.telegram_data.replace('file://', '')), 'utf-8')
+        : vars.telegram_data;
+
+      const gdriveData = vars.gdrive_data.startsWith('file://')
+        ? fs.readFileSync(path.join(__dirname, vars.gdrive_data.replace('file://', '')), 'utf-8')
+        : vars.gdrive_data || '';
+
+      // Read metadata to get actual run date
+      let runDate = vars.date;
+      try {
+        const metadata = JSON.parse(fs.readFileSync(path.join(__dirname, 'eval/test-data/live/metadata.json'), 'utf-8'));
+        runDate = metadata.run_date;
+      } catch (e) {
+        runDate = new Date().toISOString().split('T')[0];
+      }
+
+      // Build the final prompt with instructions
+      const finalPrompt = `Write the digest to a file named: digest_${runDate}.md
+
+Available data folders:
+- transformed_data/ - Today's Telegram messages
+- gdrive_data/ - Recent Google Drive documents
+- agent_memory/ - Your persistent memory (read/write)
+
+${prompt}
+
+---
+
+# Telegram Messages (LIVE PRODUCTION DATA)
+
+${telegramData}
+
+${gdriveData ? `\n# Google Drive Documents (LIVE PRODUCTION DATA)\n\n${gdriveData}` : ''}
+`;
+
+      return finalPrompt;

@@ -5,13 +5,16 @@ Context syncing tool for remote teams that automatically generates organizationa
 ## Features
 
 - **Telegram API Integration**: Export messages directly from Telegram using telethon
-- Transform Telegram JSON exports to clean markdown format
+- **Feedback Loop System**: Team members can mention `@synapse_x_bot` to provide corrections that are automatically extracted and incorporated into future digests
+- Transform Telegram JSON exports to clean markdown format with full timestamps
 - Organize messages by channels/topics
 - Preserve reactions, media references, and threading
 - Batch processing support
 - List available channels and authenticate with session strings
+- **Agent Memory System**: Past digests and coaching corrections accumulate as context over time
 - Google Drive integration for downloading team data and uploading digests
 - Automatic share link generation for uploaded digests
+- **LLM Evaluation**: Promptfoo test suites verify digest quality and feedback responsiveness
 
 ## Prerequisites
 
@@ -214,6 +217,250 @@ synapse-pipeline notify "Hello team" --token BOT_TOKEN --chat CHAT_ID
 # Send to a specific topic/thread
 synapse-pipeline notify "New digest available" --thread THREAD_ID
 ```
+
+### Extract feedback mentions
+
+```bash
+# Extract from current day's Telegram messages
+synapse-pipeline extract-feedback ./transformed_data --output feedback.txt
+
+# Extract from multiple directories (e.g., current + historical)
+synapse-pipeline extract-feedback ./transformed_data ./agent_memory --export-json feedback.json
+```
+
+## How the Feedback Loop Works
+
+The system includes a self-improving feedback mechanism:
+
+1. **Team gives correction**: Mention `@synapse_x_bot` in Telegram with your feedback
+   ```
+   @synapse_x_bot you're being too optimistic - we haven't validated PMF yet
+   ```
+
+2. **Automatic extraction**: The pipeline extracts bot mentions with surrounding context
+
+3. **Prompt injection**: Corrections are prepended to the digest generation prompt:
+   ```markdown
+   **IMMEDIATE FEEDBACK (1 item): Must address in today's digest**
+
+   The team gave you direct corrections recently. You MUST acknowledge and apply these today:
+
+   ### Immediate Feedback #1
+   - **Source**: Team Channel (2025-11-12)
+   [Full conversation context]
+   ```
+
+4. **Verified application**: Promptfoo tests verify Claude acknowledged and applied the correction
+
+5. **Long-term memory**: Agent memory accumulates coaching corrections for ongoing context
+
+This creates a feedback loop where the bot learns from team corrections over time.
+
+## LLM Evaluation with Promptfoo
+
+The system uses [Promptfoo](https://promptfoo.dev) to evaluate digest quality and verify that Claude responds appropriately to team feedback.
+
+### Current Evaluations
+
+Two test suites run automatically on every digest generation:
+
+#### 1. CI Tests (`promptfooconfig.yaml`)
+
+Four test scenarios covering structure and feedback adherence:
+
+**Deterministic checks** (fast, free):
+- **Character limit**: Must be under 4000 characters
+- **Source citations**: Should include `[#` citation markers
+- **Proper markdown structure**: Verifies `## 📅 Daily Digest` header
+
+**Feedback adherence checks** (llm-rubric):
+- **Factual correction test**: Verify Claude fixes incorrect claims when corrected
+- **Tone adjustment test**: Verify Claude adjusts tone based on team feedback
+
+These synthetic feedback tests ensure the feedback mechanism works even when there are no real team mentions.
+
+#### 2. Feedback Tests (`promptfooconfig-feedback-generated.yaml`)
+
+**Dynamically generated** tests that verify Claude acknowledged and applied team corrections:
+
+- Generated from `feedback_items.json` (extracted bot mentions)
+- Uses `llm-rubric` assertions for semantic evaluation
+- Each feedback item becomes a separate test case
+- Tests check if Claude:
+  - Acknowledged the specific correction
+  - Applied the correction to the digest
+  - Didn't repeat the mistake the team pointed out
+
+**Example test**: If team said `@synapse_x_bot Peeker is not live yet`, the test verifies Claude doesn't claim Peeker has launched.
+
+### Where Evaluations Are Stored
+
+Evaluation results are uploaded to three locations:
+
+**1. Google Drive** (`team_digests_folder`):
+```
+team_digests_folder/
+  evaluations/
+    2025-11-12/
+      ci-evaluation.json          # CI test results
+      feedback-evaluation.json    # Feedback test results
+    summary_2025-11-12.txt         # Human-readable summary
+```
+
+**2. GitHub Actions artifacts** (7-day retention):
+- `evaluation-results-{run_id}` - Contains all JSON results and summary
+
+**3. Local directory** (when running manually):
+- `eval/results/` - Test outputs and detailed results
+
+### Running Evaluations Locally
+
+```bash
+# Install Promptfoo globally
+npm install -g promptfoo
+
+# Run CI tests
+npx promptfoo eval --config promptfooconfig.yaml
+
+# Run feedback tests (if feedback exists)
+npx promptfoo eval --config promptfooconfig-feedback-generated.yaml
+
+# View results in web UI
+npx promptfoo view
+
+# Run evaluations with specific number of workers
+npx promptfoo eval --config promptfooconfig.yaml -j 1  # Sequential execution
+```
+
+### Adding New Evaluations
+
+#### Method 1: Add to existing CI test suite
+
+Edit `promptfooconfig.yaml`:
+
+```yaml
+tests:
+  - vars:
+      digest: file://path/to/test-digest.md
+    assert:
+      - type: llm-rubric
+        value: The digest should mention project milestones
+      - type: not-contains
+        value: "CONFIDENTIAL"
+      - type: javascript
+        value: output.length > 100
+```
+
+#### Method 2: Create new test configuration
+
+1. **Create new config file** (e.g., `promptfooconfig-custom.yaml`):
+
+```yaml
+prompts:
+  - file://config/team_coach_prompt.md
+
+providers:
+  - id: anthropic:messages:claude-sonnet-4-5-20250929
+    config:
+      temperature: 1.0
+      max_tokens: 16000
+
+tests:
+  - vars:
+      current_messages: file://path/to/messages.md
+    assert:
+      - type: llm-rubric
+        value: Your custom evaluation criteria here
+```
+
+2. **Add to workflow** (`.github/workflows/generate-digest.yml`):
+
+```yaml
+- name: Run Custom Evaluation
+  run: |
+    npx promptfoo eval --config promptfooconfig-custom.yaml -j 1
+```
+
+3. **Upload results**:
+
+```yaml
+- name: Upload Custom Results
+  run: |
+    uv run synapse-pipeline upload-digest eval/results/custom-evaluation.json \
+      --filename "evaluations/${EVAL_DATE}/custom-evaluation.json"
+```
+
+#### Method 3: Dynamic test generation (like feedback tests)
+
+1. **Create test generator script** (`eval/generate-my-tests.js`):
+
+```javascript
+const fs = require('fs');
+const yaml = require('js-yaml');
+
+// Load your test data
+const testData = require('./my-test-data.json');
+
+// Generate test cases
+const tests = testData.items.map(item => ({
+  vars: {
+    current_messages: `Test case: ${item.description}`,
+  },
+  assert: [
+    {
+      type: 'llm-rubric',
+      value: item.criteria
+    }
+  ]
+}));
+
+// Create config
+const config = {
+  prompts: ['file://config/team_coach_prompt.md'],
+  providers: ['anthropic:messages:claude-sonnet-4-5-20250929'],
+  tests: tests,
+  outputPath: './eval/results/my-evaluation.json'
+};
+
+// Write config
+fs.writeFileSync(
+  'promptfooconfig-my-generated.yaml',
+  yaml.dump(config)
+);
+```
+
+2. **Add to workflow**:
+
+```yaml
+- name: Generate and Run Custom Tests
+  run: |
+    node eval/generate-my-tests.js
+    npx promptfoo eval --config promptfooconfig-my-generated.yaml -j 1
+```
+
+### Assertion Types
+
+Promptfoo supports multiple assertion types:
+
+- `llm-rubric`: Use another LLM to evaluate the output semantically
+- `contains` / `not-contains`: Check for specific strings
+- `regex`: Pattern matching
+- `javascript`: Custom JavaScript validation functions
+- `python`: Custom Python validation scripts
+- `similarity`: Check semantic similarity to expected output
+- `cost`: Verify API cost constraints
+- `latency`: Verify response time
+
+See [Promptfoo assertions docs](https://promptfoo.dev/docs/configuration/expected-outputs/) for complete reference.
+
+### Best Practices
+
+1. **Use `llm-rubric` for semantic checks**: Great for verifying intent and meaning
+2. **Use `contains`/`regex` for structural checks**: Fast and deterministic
+3. **Keep tests focused**: One clear criterion per assertion
+4. **Test both positive and negative cases**: Verify what should AND shouldn't be in output
+5. **Run tests sequentially** (`-j 1`) to avoid rate limits and ensure consistent results
+6. **Store test data separately**: Keep test inputs and expected outputs in version control
 
 ## GitHub Actions Setup
 

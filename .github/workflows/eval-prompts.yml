@@ -1,0 +1,123 @@
+name: Evaluate Prompts
+
+# Run evaluation on PRs that modify prompts
+on:
+  pull_request:
+    paths:
+      - 'config/team_coach_prompt.md'
+      - 'eval/prompts/**'
+      - 'promptfooconfig.yaml'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  evaluate:
+    name: Run Prompt Evaluation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Promptfoo
+        run: npm install -g promptfoo
+
+      - name: Run Evaluation
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+        run: |
+          promptfoo eval --output eval/results/evaluation.json
+
+          echo "::notice::Prompt evaluation completed"
+
+      - name: Generate Summary
+        if: always()
+        run: |
+          echo "## 🧪 Prompt Evaluation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Parse results and create summary
+          # (Promptfoo will have generated eval/results/evaluation.json)
+
+          if [ -f "eval/results/evaluation.json" ]; then
+            # Count pass/fail (simple approach)
+            TOTAL=$(jq '.results | length' eval/results/evaluation.json)
+            PASSED=$(jq '[.results[] | select(.success == true)] | length' eval/results/evaluation.json)
+            FAILED=$((TOTAL - PASSED))
+
+            echo "- **Total Tests**: $TOTAL" >> $GITHUB_STEP_SUMMARY
+            echo "- **Passed**: ✅ $PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "- **Failed**: ❌ $FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            if [ $FAILED -eq 0 ]; then
+              echo "### ✅ All tests passed!" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "### ⚠️ Some tests failed" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "Review the artifacts for detailed results." >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⚠️ No evaluation results found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Evaluation Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prompt-evaluation-results
+          path: eval/results/
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let resultsFile = 'eval/results/evaluation.json';
+            if (!fs.existsSync(resultsFile)) {
+              console.log('No results file found');
+              return;
+            }
+
+            const results = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
+            const total = results.results.length;
+            const passed = results.results.filter(r => r.success).length;
+            const failed = total - passed;
+
+            const comment = `## 🧪 Prompt Evaluation Results
+
+            - **Total Tests**: ${total}
+            - **Passed**: ✅ ${passed}
+            - **Failed**: ❌ ${failed}
+
+            ${failed === 0 ? '### ✅ All tests passed!' : '### ⚠️ Some tests failed - review artifacts for details'}
+
+            <details>
+            <summary>View Test Details</summary>
+
+            ${results.results.map((r, i) => `
+            **Test ${i + 1}**: ${r.description || 'Unnamed test'}
+            - Status: ${r.success ? '✅ Pass' : '❌ Fail'}
+            ${r.score ? `- Score: ${r.score}` : ''}
+            ${r.reason ? `- Reason: ${r.reason}` : ''}
+            `).join('\n')}
+
+            </details>
+
+            [View full results in artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

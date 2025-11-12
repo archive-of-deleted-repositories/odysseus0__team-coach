@@ -74,3 +74,9 @@ htmlcov/
 
 # UV
 .venv/
+
+# Promptfoo evaluation results
+eval/results/
+eval/test-data/live/
+.promptfoo/
+node_modules/
