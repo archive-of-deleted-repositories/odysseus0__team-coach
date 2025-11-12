@@ -266,13 +266,18 @@ Two test suites run automatically on every digest generation:
 
 #### 1. CI Tests (`promptfooconfig.yaml`)
 
-Fast, deterministic structural tests that every digest must pass:
+Four test scenarios covering structure and feedback adherence:
 
+**Deterministic checks** (fast, free):
 - **Character limit**: Must be under 4000 characters
 - **Source citations**: Should include `[#` citation markers
 - **Proper markdown structure**: Verifies `## 📅 Daily Digest` header
 
-These tests use JavaScript and string matching for fast, cost-free validation. No LLM evaluations in CI tests.
+**Feedback adherence checks** (llm-rubric):
+- **Factual correction test**: Verify Claude fixes incorrect claims when corrected
+- **Tone adjustment test**: Verify Claude adjusts tone based on team feedback
+
+These synthetic feedback tests ensure the feedback mechanism works even when there are no real team mentions.
 
 #### 2. Feedback Tests (`promptfooconfig-feedback-generated.yaml`)
 
