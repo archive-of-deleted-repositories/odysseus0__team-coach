@@ -280,27 +280,37 @@ def extract_feedback(
     output_file: Path = typer.Option(Path('feedback_section.txt'), '--output', '-o', help='Output file for feedback section'),
     bot_pattern: str = typer.Option("@synapse_x_bot", '--bot-pattern', '-b', help='Bot mention pattern to search for'),
     context_lines: int = typer.Option(5, '--context', '-c', help='Number of context lines before/after mention'),
+    immediate_days: int = typer.Option(1, '--immediate-days', '-i', help='Number of days to consider as immediate feedback'),
+    export_json: Path | None = typer.Option(None, '--export-json', '-j', help='Export structured feedback as JSON for testing'),
 ):
     """Extract bot mentions from transformed Telegram messages for coach feedback."""
-    from synapse.processors.feedback_extractor import extract_bot_mentions, save_feedback_section
+    from synapse.processors.feedback_extractor import extract_bot_mentions, save_feedback_section, export_feedback_for_testing
 
     typer.echo(f'🔍 Scanning {transformed_dir} for "{bot_pattern}" mentions...')
 
-    feedback_text = extract_bot_mentions(transformed_dir, bot_pattern, context_lines)
+    feedback_text = extract_bot_mentions(transformed_dir, bot_pattern, context_lines, immediate_days)
 
     if not feedback_text:
         typer.echo('✅ No feedback mentions found')
         # Create empty file so workflow doesn't fail
         output_file.write_text("", encoding='utf-8')
+        if export_json:
+            export_feedback_for_testing(transformed_dir, export_json, bot_pattern, context_lines, immediate_days)
         return
 
     # Count mentions
-    mention_count = feedback_text.count("### Team Mention #")
-    typer.echo(f'✅ Found {mention_count} feedback mention(s)')
+    immediate_count = feedback_text.count("### Immediate Feedback #")
+    historical_count = feedback_text.count("### Historical Feedback #")
+    typer.echo(f'✅ Found {immediate_count} immediate + {historical_count} historical feedback mention(s)')
 
     # Save to file
     save_feedback_section(feedback_text, output_file)
     typer.echo(f'📄 Feedback section saved to {output_file}')
+
+    # Export structured JSON if requested
+    if export_json:
+        export_feedback_for_testing(transformed_dir, export_json, bot_pattern, context_lines, immediate_days)
+        typer.echo(f'📊 Structured feedback exported to {export_json}')
 
 
 @app.command()

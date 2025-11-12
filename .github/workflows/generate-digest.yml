@@ -69,7 +69,7 @@ jobs:
           SYNAPSE_TELEGRAM__API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           SYNAPSE_TELEGRAM__SESSION_STRING: ${{ secrets.TELEGRAM_SESSION_STRING }}
         run: |
-          START_DATE=$(date -d "${{ github.event.inputs.start_days_ago || '1' }} days ago" +%Y-%m-%d)
+          START_DATE=$(date -d "${{ github.event.inputs.start_days_ago || '30' }} days ago" +%Y-%m-%d)
           uv run synapse-pipeline export-telegram \
             --start "$START_DATE" \
             --end "$(date +%Y-%m-%d)" \
@@ -141,7 +141,7 @@ jobs:
         run: |
           uv run synapse-pipeline download-gdrive \
             ./gdrive_data \
-            --since-days ${{ github.event.inputs.start_days_ago || '1' }}
+            --since-days 1
           
           # Count downloaded files for metadata
           FILE_COUNT=$(find ./gdrive_data -type f | wc -l || echo "0")
@@ -245,7 +245,9 @@ jobs:
           uv run synapse-pipeline extract-feedback \
             ./transformed_data \
             --output feedback_section.txt \
-            --bot-pattern "@synapse_x_bot"
+            --bot-pattern "@synapse_x_bot" \
+            --immediate-days 1 \
+            --export-json ./feedback_items.json
 
           # Show what was found (for debugging)
           if [ -s feedback_section.txt ]; then
@@ -261,6 +263,14 @@ jobs:
           name: feedback-section-${{ github.run_id }}
           path: feedback_section.txt
           retention-days: 7
+
+      - name: Upload Feedback JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: feedback-items-${{ github.run_id }}
+          path: feedback_items.json
+          retention-days: 7
+          if-no-files-found: ignore
 
   # Job 5: Generate Digest (Depends on Transform, GDrive, and Feedback)
   generate-digest:
