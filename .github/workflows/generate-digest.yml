@@ -553,7 +553,13 @@ jobs:
         run: |
           EVAL_DATE=$(date +%Y-%m-%d)
           mkdir -p eval-upload
-          cp eval/results/*.json eval-upload/
+
+          # Only copy if JSON files exist
+          if ls eval/results/*.json 1> /dev/null 2>&1; then
+            cp eval/results/*.json eval-upload/
+          else
+            echo "::warning::No evaluation result files found to upload"
+          fi
 
           # Create summary file
           cat > eval-upload/summary_${EVAL_DATE}.txt <<EOF
