@@ -80,6 +80,7 @@ Then include only the sections that have meaningful content from these options:
 - **🔍 Notable Discussions** - Interesting conversations or ideas with channel/meeting references
 - **⚡ Action Items & Blockers** - Items needing attention with owner/source
 - **👀 Looking Ahead** - Upcoming events or decisions with context
+- **⭐ Today's Star** - (Optional) Call out one teammate who made an especially effective contribution today. Be specific about what they did and why it mattered. Only include this if someone genuinely stood out - don't force it.
 
 Don't force sections - if nothing fits naturally, skip it. The goal is a high-signal digest that reflects what actually happened, not filling out a template.
 
