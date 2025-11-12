@@ -454,7 +454,126 @@ jobs:
           echo "url=$SHARE_LINK" >> $GITHUB_OUTPUT
           echo "::notice::Uploaded to Google Drive: $SHARE_LINK"
 
-  # Job 7: Send Telegram Notification (Parallel Distribution)
+  # Job 7: Evaluate Digest Quality (Parallel with Distribution)
+  evaluate-digest:
+    name: Evaluate Digest Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [generate-digest, extract-feedback]
+    if: needs.generate-digest.result == 'success'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Promptfoo
+        run: npm install -g promptfoo js-yaml
+
+      - name: Download Digest
+        uses: actions/download-artifact@v4
+        with:
+          name: team-digest-${{ github.run_id }}
+          path: eval/test-data/current/
+
+      - name: Download Feedback Items
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: feedback-items-${{ github.run_id }}
+          path: eval/test-data/current/
+
+      - name: Run Basic Quality Evaluation
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+        run: |
+          # Create evaluation config for current digest
+          cat > promptfooconfig-ci.yaml <<EOF
+          description: "CI Digest Evaluation"
+          prompts: ["{{digest_output}}"]
+          providers: ["echo"]
+          defaultTest:
+            options:
+              provider: anthropic:messages:claude-sonnet-4-5-20250929
+          tests:
+            - description: "Digest quality checks"
+              vars:
+                digest_output: file://eval/test-data/current/${{ needs.generate-digest.outputs.digest-filename }}
+              assert:
+                - type: javascript
+                  value: output.length < 4000
+                - type: icontains
+                  value: "Daily Digest"
+                - type: llm-rubric
+                  value: "Digest is professional, concise, and includes source citations"
+          outputPath: eval/results/ci-evaluation.json
+          EOF
+
+          promptfoo eval --config promptfooconfig-ci.yaml -j 1 || echo "::warning::Basic evaluation had failures"
+
+      - name: Generate Feedback-Specific Tests
+        if: hashFiles('eval/test-data/current/feedback_items.json') != ''
+        run: |
+          node eval/generate-feedback-tests.js \
+            eval/test-data/current/feedback_items.json \
+            eval/test-data/current/${{ needs.generate-digest.outputs.digest-filename }}
+
+      - name: Run Feedback Evaluation
+        if: hashFiles('promptfooconfig-feedback-generated.yaml') != ''
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+        run: |
+          promptfoo eval --config promptfooconfig-feedback-generated.yaml -j 1 || echo "::warning::Feedback evaluation had failures"
+
+      - name: Upload Evaluation Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-results-${{ github.run_id }}
+          path: eval/results/
+          retention-days: 30
+
+      - name: Setup uv Environment
+        uses: ./.github/actions/setup-uv-env
+
+      - name: Install rclone
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+
+      - name: Setup Google Drive Service Account
+        run: |
+          echo '${{ secrets.GDRIVE_SERVICE_ACCOUNT_B64 }}' | base64 -d > service-account.json
+          chmod 600 service-account.json
+
+      - name: Upload Evaluation Results to Google Drive
+        run: |
+          EVAL_DATE=$(date +%Y-%m-%d)
+          mkdir -p eval-upload
+          cp eval/results/*.json eval-upload/
+
+          # Create summary file
+          cat > eval-upload/summary_${EVAL_DATE}.txt <<EOF
+          Digest Evaluation Summary - ${EVAL_DATE}
+
+          Workflow Run: ${{ github.run_id }}
+          Commit: ${{ github.sha }}
+
+          See JSON files for detailed results.
+          EOF
+
+          # Upload to Google Drive
+          uv run synapse-pipeline upload-digest eval-upload/summary_${EVAL_DATE}.txt --filename "evaluations/summary_${EVAL_DATE}.txt" || echo "::warning::Failed to upload summary"
+
+          for file in eval-upload/*.json; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file")
+              uv run synapse-pipeline upload-digest "$file" --filename "evaluations/${EVAL_DATE}/${filename}" || echo "::warning::Failed to upload $filename"
+            fi
+          done
+
+  # Job 8: Send Telegram Notification (Parallel Distribution)
   notify-team:
     name: Send Telegram Notification
     runs-on: ubuntu-latest
@@ -493,7 +612,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     if: always()
-    needs: [export-telegram, export-gdrive, transform-data, extract-feedback, generate-digest, upload-digest, notify-team]
+    needs: [export-telegram, export-gdrive, transform-data, extract-feedback, generate-digest, evaluate-digest, upload-digest, notify-team]
     steps:
       - name: Generate Workflow Summary
         run: |
@@ -505,6 +624,7 @@ jobs:
           echo "- **Data Transform**: ${{ needs.transform-data.result == 'success' && '✅' || '❌' }} ${{ needs.transform-data.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Feedback Extraction**: ${{ needs.extract-feedback.result == 'success' && '✅' || '❌' }} ${{ needs.extract-feedback.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Digest Generation**: ${{ needs.generate-digest.result == 'success' && '✅' || '❌' }} ${{ needs.generate-digest.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Digest Evaluation**: ${{ needs.evaluate-digest.result == 'success' && '✅' || '❌' }} ${{ needs.evaluate-digest.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Google Drive Upload**: ${{ needs.upload-digest.result == 'success' && '✅' || needs.upload-digest.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.upload-digest.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Telegram Notification**: ${{ needs.notify-team.result == 'success' && '✅' || needs.notify-team.result == 'skipped' && '⏭️' || '❌' }} ${{ needs.notify-team.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
