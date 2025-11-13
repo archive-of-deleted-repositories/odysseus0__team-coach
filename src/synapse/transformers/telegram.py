@@ -40,6 +40,7 @@ class TelegramMessage(BaseModel):
     author: str = Field(alias='from')
     text: str | list[dict[str, Any]] | None = None
     reply_to_message_id: int | None = None
+    reply_to_top_id: int | None = None
     photo: str | None = None
     file: str | None = None
     sticker_emoji: str | None = None
@@ -63,8 +64,13 @@ class TelegramMessage(BaseModel):
 
     @property
     def channel_id(self) -> int | None:
-        """Get the channel ID this message belongs to."""
-        return self.reply_to_message_id
+        """Get the topic ID this message belongs to.
+
+        For Telegram forum topics:
+        - Messages that are replies within a topic have reply_to_top_id set to the topic ID
+        - Messages that are in a topic but not replies have reply_to_message_id set to the topic ID
+        """
+        return self.reply_to_top_id or self.reply_to_message_id
 
     @property
     def formatted_time(self) -> str:

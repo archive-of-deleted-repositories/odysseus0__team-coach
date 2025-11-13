@@ -86,7 +86,15 @@ jobs:
           path: telegram_exports/
           retention-days: 7
           compression-level: 6
-      
+
+      - name: Upload Topic Mapping
+        uses: actions/upload-artifact@v4
+        with:
+          name: topic-mapping-${{ github.run_id }}
+          path: config/telegram_topic_mapping.csv
+          retention-days: 7
+          if-no-files-found: ignore
+
       - name: Set Export Status
         id: export-status
         run: |
@@ -197,7 +205,14 @@ jobs:
         with:
           name: telegram-exports-${{ github.run_id }}
           path: telegram_exports/
-      
+
+      - name: Download Topic Mapping
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: topic-mapping-${{ github.run_id }}
+          path: config/
+
       # Transform Telegram data to markdown
       - name: Transform Telegram Data
         run: |

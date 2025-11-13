@@ -1,5 +1,6 @@
 """Telegram API exporter using telethon."""
 
+import csv
 import json
 from datetime import datetime
 from pathlib import Path
@@ -7,6 +8,7 @@ from typing import Any
 
 from telethon import TelegramClient
 from telethon.sessions import StringSession
+from telethon.tl.functions.channels import GetForumTopicsRequest
 from telethon.tl.types import Channel, Message, MessageReactions, ReactionEmoji, User
 
 from synapse.config import get_settings
@@ -41,10 +43,10 @@ async def authenticate_client() -> TelegramClient:
 
 async def list_available_channels(client: TelegramClient) -> list[tuple[int, str]]:
     """List all available channels/groups for the authenticated user.
-    
+
     Args:
         client: Authenticated TelegramClient
-        
+
     Returns:
         List of (channel_id, channel_name) tuples
     """
@@ -53,6 +55,45 @@ async def list_available_channels(client: TelegramClient) -> list[tuple[int, str
         if isinstance(dialog.entity, Channel):
             channels.append((dialog.entity.id, dialog.entity.title))
     return channels
+
+
+async def get_forum_topics(client: TelegramClient, channel: Channel) -> dict[int, str]:
+    """Get forum topics from a channel if it's a forum.
+
+    Args:
+        client: Authenticated TelegramClient
+        channel: Channel entity
+
+    Returns:
+        Dictionary mapping topic_id to topic_name
+    """
+    topic_mapping = {}
+
+    # Check if channel has forum enabled
+    if not hasattr(channel, 'forum') or not channel.forum:
+        return topic_mapping
+
+    try:
+        # Get forum topics
+        result = await client(GetForumTopicsRequest(
+            channel=channel,
+            offset_date=None,
+            offset_id=0,
+            offset_topic=0,
+            limit=100
+        ))
+
+        # Extract topic names
+        for topic in result.topics:
+            if hasattr(topic, 'id') and hasattr(topic, 'title'):
+                topic_mapping[topic.id] = topic.title
+
+        print(f'  Found {len(topic_mapping)} forum topics')
+
+    except Exception as e:
+        print(f'  Warning: Could not fetch forum topics: {e}')
+
+    return topic_mapping
 
 
 def format_text_entities(message: Message) -> str | list[dict[str, Any]]:
@@ -132,8 +173,12 @@ def format_message(message: Message, users: dict[int, User]) -> dict[str, Any]:
     }
     
     # Add optional fields
-    if message.reply_to and message.reply_to.reply_to_msg_id:
-        formatted['reply_to_message_id'] = message.reply_to.reply_to_msg_id
+    if message.reply_to:
+        if message.reply_to.reply_to_msg_id:
+            formatted['reply_to_message_id'] = message.reply_to.reply_to_msg_id
+        # For forum topics: reply_to_top_id contains the topic ID for reply messages
+        if hasattr(message.reply_to, 'reply_to_top_id') and message.reply_to.reply_to_top_id:
+            formatted['reply_to_top_id'] = message.reply_to.reply_to_top_id
     
     if message.photo:
         formatted['photo'] = f'photo_{message.id}.jpg'
@@ -240,39 +285,52 @@ async def export_telegram_channels(
     output_dir: Path
 ) -> list[Path]:
     """Export telegram data to JSON files matching existing format.
-    
+
     Channels to export are read from SYNAPSE_TELEGRAM__CHANNEL_IDS env var.
-    
+
     Args:
         start_date: Start date for export
-        end_date: End date for export  
+        end_date: End date for export
         output_dir: Directory to save JSON files
-        
+
     Returns:
         List of paths to created JSON files
     """
     settings = get_settings()
-    
+
     # Get channel IDs from config
     channel_ids = settings.telegram.channel_ids
     if not channel_ids:
         raise ValueError('No channel IDs configured. Set channel_ids in config.toml or SYNAPSE_TELEGRAM__CHANNEL_IDS')
-    
+
     # Convert string IDs to integers
     channel_ids = [int(cid) for cid in channel_ids]
-    
+
     # Create output directory
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Connect to Telegram
     client = await authenticate_client()
-    
+
     try:
         output_files = []
-        
+        all_topic_mappings = {}
+
         for channel_id in channel_ids:
             print(f'Exporting channel {channel_id}...')
-            
+
+            # Get channel entity first
+            try:
+                channel = await client.get_entity(channel_id)
+            except Exception as e:
+                print(f'Warning: Could not access channel {channel_id}: {e}')
+                continue
+
+            # Get forum topics if it's a forum channel
+            if isinstance(channel, Channel):
+                topics = await get_forum_topics(client, channel)
+                all_topic_mappings.update(topics)
+
             # Export messages
             channel_data = await export_channel_messages(
                 client,
@@ -280,7 +338,7 @@ async def export_telegram_channels(
                 start_date,
                 end_date
             )
-            
+
             if not channel_data:
                 continue
             
@@ -296,9 +354,22 @@ async def export_telegram_channels(
             
             output_files.append(output_path)
             print(f'✓ Exported {len(channel_data.get("messages", []))} messages to {output_path}')
-        
+
+        # Save topic mapping to CSV
+        if all_topic_mappings:
+            mapping_path = Path(settings.telegram.topic_mapping_file)
+            mapping_path.parent.mkdir(parents=True, exist_ok=True)
+
+            with open(mapping_path, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=['topic_id', 'topic_name'])
+                writer.writeheader()
+                for topic_id, topic_name in sorted(all_topic_mappings.items()):
+                    writer.writerow({'topic_id': topic_id, 'topic_name': topic_name})
+
+            print(f'✓ Saved topic mapping ({len(all_topic_mappings)} topics) to {mapping_path}')
+
         return output_files
-        
+
     finally:
         await client.disconnect()
 
