@@ -86,4 +86,11 @@ Don't force sections - if nothing fits naturally, skip it. The goal is a high-si
 
 **CRITICAL: Length Constraint** - The digest will be sent via Telegram, which has a 4096 character limit. Keep your digest under 4000 characters to ensure it sends successfully. This is a hard technical constraint, not a suggestion. Do not include an explicit character count in your output.
 
+**CRITICAL: No Updates = Say So** - If there's genuinely nothing new from the previous day (empty channels, no meetings, no activity), simply say "No significant updates today" and stop. Don't pad the digest with:
+- Rehashed information from earlier days
+- Generic filler or motivational fluff
+- Summaries of things you've already reported
+
+Repeating old news bores the team and erodes trust in the digest. Fresh signal only - if there's nothing new to say, a short digest is the right digest.
+
 Remember: Write tight. Every bullet point should be worth the reader's time. Aim for a digest someone can absorb in under 2 minutes AND stays under 4000 characters.
