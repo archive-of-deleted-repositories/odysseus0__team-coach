@@ -194,3 +194,25 @@ Results uploaded to `team_digests_folder/evaluations/YYYY-MM-DD/` in Google Driv
 - Python 3.12+ is strictly required
 - Feedback system creates a self-improving loop: team corrections → prompt updates → better digests
 - Agent memory provides natural historical context without complex extraction logic
+
+## Development Workflow
+
+When making changes to this codebase, follow this process:
+
+1. **Make the changes** - Edit the relevant files
+2. **Commit and push** - Push changes to the remote repository
+3. **Test run** - Trigger the GitHub Action with `skip_upload=true` and `skip_notify=true` to verify changes work:
+   ```bash
+   gh workflow run "Generate Team Digest" --field skip_upload=true --field skip_notify=true
+   ```
+4. **Monitor the run** - Check the workflow status:
+   ```bash
+   gh run list --workflow="Generate Team Digest" --limit 3
+   ```
+5. **Get user confirmation** - Ask the user to confirm the test run passed before proceeding
+6. **Live run** - Once the user confirms, run it live (with Google Drive upload and Telegram notification):
+   ```bash
+   gh workflow run "Generate Team Digest"
+   ```
+
+This ensures changes are validated before affecting the live digest distribution.
