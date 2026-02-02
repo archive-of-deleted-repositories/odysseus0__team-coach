@@ -1,10 +1,10 @@
 name: Generate Team Digest
 
 on:
-  # Daily schedule - Every day at 12:00 UTC
-  schedule:
-    - cron: '0 12 * * *'
-  
+  # Disabled - was failing and polluting notifications
+  # schedule:
+  #   - cron: '0 12 * * *'
+
   # Manual trigger with optional parameters
   workflow_dispatch:
     inputs:
